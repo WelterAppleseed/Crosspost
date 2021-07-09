@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Crossposter2</string>
+    <string name="tg_dialog_title">
+        <font size="20"><b> Please, enter the channel name</b></font>
+    </string>
+    <string name="tg_dialog_text">
+        <font size="14">Click on the channel headliner and input text after:</font></string>
+    <string name="tg_dialog_example">
+         <p><b>• t.me/{channel_name}</b></p>
+    </string>
+    <string name="vk_app_id">7838662</string>
+    <string name="add_l">Connect with</string>
+    <string name="msg_l">Would you like to add…</string>
+    <string name="close">Close</string>
+    <string name="vk_dialog_msg">Add VK</string>
+    <string name="fb_dialog_msg">Add Facebook</string>
+    <string name="tg_dialog_msg">Add Telegram</string>
+</resources>
