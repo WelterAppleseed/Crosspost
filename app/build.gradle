@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     useLibrary 'org.apache.http.legacy'
@@ -9,7 +10,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    
+
     defaultConfig {
         applicationId "com.example.crossposter2"
         minSdkVersion 21
@@ -35,10 +36,13 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.0.0")
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.google.firebase:firebase-auth:21.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    compile 'org.telegram:passport:1.1'
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.facebook.android:facebook-share:[4,5)'
+
 
 }
