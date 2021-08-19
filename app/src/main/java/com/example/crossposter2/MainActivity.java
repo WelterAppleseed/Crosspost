@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
@@ -12,6 +13,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +23,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -37,17 +42,26 @@ import com.example.crossposter2.account.Account;
 import com.example.crossposter2.account.Api;
 import com.example.crossposter2.exceptions.KException;
 import com.example.crossposter2.fb.FbConstant;
+import com.example.crossposter2.fb.FbSend;
+import com.example.crossposter2.fb.FbShare;
 import com.example.crossposter2.tg.DataFragment;
 import com.example.crossposter2.tg.IsAppAvailable;
 import com.example.crossposter2.utils.ImageUI;
 import com.example.crossposter2.vk.VkAuth;
 import com.example.crossposter2.vk.VkConstant;
 import com.facebook.CallbackManager;
+import com.facebook.FacebookDialog;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.widget.LoginButton;
+import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.ShareMedia;
+import com.facebook.share.model.ShareMediaContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.MessageDialog;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
@@ -55,8 +69,11 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private final int SHOW_MESSENGERS_DIALOG = 2;
@@ -82,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager callbackManager;
     private LoginButton loginButton;
     Button logoutButton;
+    Uri [] uris = new Uri[5];
     LoginButton logoutButton1;
     ShareButton shareButton;
     LinearLayout imgLayout;
@@ -91,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     Button dialogButton;
     View.OnTouchListener imgListener = new ImageUI().getImageListener();
     Button cre;
+    Bitmap[] images = new Bitmap[5];
     EditText messageEditText;
     Account vkAccount = new Account();
     Account fbAccount = new Account();
@@ -131,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
                             imgGroup[lenCount].setVisibility(View.VISIBLE);
                             imgGroup[lenCount].setColorFilter(515);
                             imgGroup[lenCount].setImageBitmap(bitmap);
+                            images[lenCount] = bitmap;
+                            uris[lenCount] = mImageUri;
                         } else {
                             if (data.getClipData() != null) {
                                 ClipData mClipData = data.getClipData();
@@ -144,6 +165,8 @@ public class MainActivity extends AppCompatActivity {
                                     imgGroup[lenCount].setVisibility(View.VISIBLE);
                                     imgGroup[lenCount].setColorFilter(515);
                                     imgGroup[lenCount].setImageBitmap(bitmap);
+                                    images[lenCount] = bitmap;
+                                    uris[lenCount] = uri;
                                     lenCount++;
                                 }
                                 imgLayout.setVisibility(View.VISIBLE);
@@ -169,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_main);
         //FB
+        shareDialog = new ShareDialog(this);
         fbRestore();
         //VK
         vkRestore();
@@ -316,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
             vkApi = new Api(vkAccount.access_token_vk, VkConstant.AppId);
         }
     }
+
     @SuppressLint("ClickableViewAccessibility")
     public void createUI() {
         dialogButton = (Button) findViewById(R.id.dialog_button);
@@ -393,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     if (fS.isChecked()) {
                                         System.out.println("FS");
-                                        //fbAction();
+                                        fbAction();
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -466,20 +491,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void fbAction() {
-        if (ShareDialog.canShow(ShareLinkContent.class)) {
-            ShareLinkContent content = new ShareLinkContent.Builder()
-                    .setContentUrl(Uri.parse("https://developers.facebook.com"))
-                    .build();
-            shareDialog.show(content);
-            MessageDialog.show(this, content);
-        }
-
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
+        intent.setType("image/jpeg");
+        ArrayList<Uri> files = new ArrayList<Uri>(Arrays.asList(uris));
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+        startActivity(intent);
+        runOnUiThread(clipboardRunnable);
     }
 
     Runnable successRunnable = new Runnable() {
         @Override
         public void run() {
             Toast.makeText(getApplicationContext(), "Запись успешно добавлена", Toast.LENGTH_LONG).show();
+        }
+    };
+    Runnable clipboardRunnable = new Runnable() {
+        @Override
+        public void run() {
+            ClipboardManager clipboard = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("", messageEditText.getText().toString());
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(MainActivity.this, "Some messengers that you have chosen do not support the auto-complete text function, so your text was copied to the clipboard.", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -494,6 +527,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
