@@ -13,10 +13,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.crossposter2.account.Api;
-import com.example.crossposter2.vk.VkAuth;
-import com.example.crossposter2.vk.VkConstant;
-import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -25,8 +21,12 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.firebase.auth.FirebaseAuth;
+import com.vk.api.sdk.VK;
+import com.vk.api.sdk.auth.VKAccessToken;
+import com.vk.api.sdk.auth.VKAuthCallback;
+import com.vk.api.sdk.auth.VKScope;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,21 +43,6 @@ public class StartPage extends AppCompatActivity {
     public static String redirect_url="https://oauth.vk.com/blank.html";
     private static String API_VERSION="5.5";
 
-    ActivityResultLauncher<Intent> authorizeVkIntentLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent data = result.getData();
-                        Intent intent = new Intent(StartPage.this, MainActivity.class);
-                        intent.putExtra("access_token_vk", data.getStringExtra("token"));
-                        intent.putExtra("user_id_vk", data.getLongExtra("user_id", 0));
-                        startActivity(intent);
-                    }
-                }
-            });
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +51,6 @@ public class StartPage extends AppCompatActivity {
         setContentView(R.layout.start_page);
         fbContentCreate();
         vkContentCreate();
-
     }
     private void fbContentCreate() {
         fb_button = (Button) findViewById(R.id.fb);
@@ -148,17 +132,30 @@ public class StartPage extends AppCompatActivity {
         vk_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(getApplicationContext(), VkAuth.class);
-                authorizeVkIntentLauncher.launch(intent);
+                VK.login(StartPage.this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
             }
         });
     }
     @Override
     protected void onActivityResult(int requestCode, int responseCode,
                                     Intent data) {
-        super.onActivityResult(requestCode, responseCode, data);
         callbackManager.onActivityResult(requestCode, responseCode, data);
+        VKAuthCallback callback = new VKAuthCallback() {
+            @Override
+            public void onLogin(@NotNull VKAccessToken vkAccessToken) {
+                Intent intent = new Intent(StartPage.this, MainActivity.class);
+                System.out.println("log");
+                startActivity(intent);
+            }
+
+            @Override
+            public void onLoginFailed(int i) {
+
+            }
+        };
+        if (data == null || !VK.onActivityResult(requestCode, responseCode, data, callback)) {
+            super.onActivityResult(requestCode, responseCode, data);
+        }
     }
 
 }

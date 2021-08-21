@@ -4,12 +4,9 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
@@ -23,9 +20,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -40,40 +34,29 @@ import android.widget.Toast;
 
 import com.example.crossposter2.account.Account;
 import com.example.crossposter2.account.Api;
-import com.example.crossposter2.exceptions.KException;
 import com.example.crossposter2.fb.FbConstant;
-import com.example.crossposter2.fb.FbSend;
-import com.example.crossposter2.fb.FbShare;
-import com.example.crossposter2.tg.DataFragment;
 import com.example.crossposter2.tg.IsAppAvailable;
 import com.example.crossposter2.utils.ImageUI;
-import com.example.crossposter2.vk.VkAuth;
-import com.example.crossposter2.vk.VkConstant;
+import com.example.crossposter2.vk.VKWallPostCommand;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookDialog;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.widget.LoginButton;
-import com.facebook.share.model.ShareContent;
-import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.ShareMedia;
-import com.facebook.share.model.ShareMediaContent;
-import com.facebook.share.model.SharePhoto;
-import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.model.ShareVideoContent;
-import com.facebook.share.widget.MessageDialog;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
 import com.google.firebase.auth.FirebaseAuth;
+import com.vk.api.sdk.VK;
+import com.vk.api.sdk.VKApiCallback;
+import com.vk.api.sdk.VKTokenExpiredHandler;
+import com.vk.api.sdk.auth.VKAccessToken;
+import com.vk.api.sdk.auth.VKAuthCallback;
+import com.vk.api.sdk.auth.VKScope;
 
-import org.json.JSONException;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private final int SHOW_MESSENGERS_DIALOG = 2;
@@ -99,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager callbackManager;
     private LoginButton loginButton;
     Button logoutButton;
-    Uri [] uris = new Uri[5];
+    ArrayList<Uri> uris = new ArrayList<>();
     LoginButton logoutButton1;
     ShareButton shareButton;
     LinearLayout imgLayout;
@@ -108,28 +91,17 @@ public class MainActivity extends AppCompatActivity {
     Button postButton, post, addImageButton;
     Button dialogButton;
     View.OnTouchListener imgListener = new ImageUI().getImageListener();
-    Button cre;
+    VKTokenExpiredHandler tokenHandler = new VKTokenExpiredHandler() {
+        @Override
+        public void onTokenExpired() {
+            Toast.makeText(MainActivity.this, "Token has been expired.", Toast.LENGTH_SHORT).show();
+        }
+    };
+    VK vk;
     Bitmap[] images = new Bitmap[5];
     EditText messageEditText;
-    Account vkAccount = new Account();
     Account fbAccount = new Account();
-    FragmentManager fragmentManager;
-    DataFragment dataFragment;
-    ActivityResultLauncher<Intent> authorizeVkIntentLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent data = result.getData();
-                        vkAccount.access_token_vk = data.getStringExtra("token");
-                        vkAccount.user_id_vk = data.getLongExtra("user_id", 0);
-                        vkAccount.saveVk(MainActivity.this);
-                        vkApi = new Api(vkAccount.access_token_vk, VkConstant.AppId);
-                        showButtons();
-                    }
-                }
-            });
+
     ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -151,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                             imgGroup[lenCount].setColorFilter(515);
                             imgGroup[lenCount].setImageBitmap(bitmap);
                             images[lenCount] = bitmap;
-                            uris[lenCount] = mImageUri;
+                            uris.add(mImageUri);
                         } else {
                             if (data.getClipData() != null) {
                                 ClipData mClipData = data.getClipData();
@@ -166,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                                     imgGroup[lenCount].setColorFilter(515);
                                     imgGroup[lenCount].setImageBitmap(bitmap);
                                     images[lenCount] = bitmap;
-                                    uris[lenCount] = uri;
+                                    uris.add(uri);
                                     lenCount++;
                                 }
                                 imgLayout.setVisibility(View.VISIBLE);
@@ -181,12 +153,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-    Api vkApi, fbApi;
+    Api fbApi;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
         callbackManager = CallbackManager.Factory.create();
@@ -195,11 +168,18 @@ public class MainActivity extends AppCompatActivity {
         shareDialog = new ShareDialog(this);
         fbRestore();
         //VK
-        vkRestore();
-        createUI();
-        showButtons();
+        VK.addTokenExpiredHandler(tokenHandler);
+        //
+        checkAuth();
     }
-
+    private void checkAuth() {
+        if (!VK.isLoggedIn() && fbApi == null) {
+            Intent intent = new Intent(MainActivity.this, StartPage.class);
+            startActivity(intent);
+        } else {
+            createUI();
+        }
+    }
     @Override
     protected Dialog onCreateDialog(int id) {
         if (id == SHOW_MESSENGERS_DIALOG) {
@@ -241,13 +221,9 @@ public class MainActivity extends AppCompatActivity {
                             assert logoutFrom != null;
                             switch (logoutFrom[which]) {
                                 case "VK": {
-                                    if (vkApi != null) {
-                                        vkApi = null;
-                                        vkAccount.access_token_vk = null;
-                                        vkAccount.user_id_vk = 0;
-                                        vkAccount.saveVk(MainActivity.this);
-                                        Toast.makeText(getApplicationContext(), "You have logged out of your VK account", Toast.LENGTH_SHORT).show();
-                                        break;
+                                    if (VK.isLoggedIn()) {
+                                        Toast.makeText(getApplicationContext(), "You have logged out of your VK account", Toast.LENGTH_LONG).show();
+                                        VK.logout();
                                     } else {
                                         Toast.makeText(getApplicationContext(), "You are not authorized with VK", Toast.LENGTH_SHORT).show();
                                     }
@@ -270,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-                            showButtons();
+                            checkAuth();
                         }
                     });
             return builder.create();
@@ -321,23 +297,6 @@ public class MainActivity extends AppCompatActivity {
         fbAccount.restoreFb(this);
         if (fbAccount.access_token_fb != null) {
             fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
-        }
-    }
-
-    private void vkRestore() {
-        if (getIntent().getStringExtra("access_token_vk") != null) {
-            vk_token = getIntent().getStringExtra("access_token_vk");
-            vk_user_id = getIntent().getLongExtra("user_id_vk", 0);
-            if (vk_token != null) {
-                vkAccount.access_token_vk = vk_token;
-                vkAccount.user_id_vk = vk_user_id;
-                vkAccount.saveVk(MainActivity.this);
-                vkApi = new Api(vkAccount.access_token_vk, VkConstant.AppId);
-            }
-        }
-        vkAccount.restoreVk(this);
-        if (vkAccount.access_token_vk != null) {
-            vkApi = new Api(vkAccount.access_token_vk, VkConstant.AppId);
         }
     }
 
@@ -418,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     if (fS.isChecked()) {
                                         System.out.println("FS");
-                                        fbAction();
+                                        //fbAction();
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -439,6 +398,7 @@ public class MainActivity extends AppCompatActivity {
         addImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                uris.clear();
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -449,16 +409,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onVkClick() {
-        Intent intent = new Intent();
-        intent.setClass(getApplicationContext(), VkAuth.class);
-        authorizeVkIntentLauncher.launch(intent);
+        VK.login(this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
     }
 
-    public void vkAction() throws JSONException, IOException, KException {
-        String text = messageEditText.getText().toString();
-        vkApi.createWallPost(vkAccount.user_id_vk, text, null, null, false, false, false, null, null, null, 0L, null, null, 5.131);
-        //Показать сообщение в UI потоке
-        runOnUiThread(successRunnable);
+    public void vkAction() {
+        VK.execute(new VKWallPostCommand(messageEditText.getText().toString(), uris, VK.getUserId(), false, false), new VKApiCallback<Integer>() {
+            @Override
+            public void success(Integer integer) {
+                runOnUiThread(successRunnable);
+            }
+            @Override
+            public void fail(@NotNull Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void onTgClick() {
@@ -494,8 +458,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
         intent.setType("image/jpeg");
-        ArrayList<Uri> files = new ArrayList<Uri>(Arrays.asList(uris));
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         startActivity(intent);
         runOnUiThread(clipboardRunnable);
     }
@@ -516,22 +479,22 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    void showButtons() {
-        if (vkApi != null | fbApi != null) {
-            dialogButton.setVisibility(View.VISIBLE);
-            logoutButton.setVisibility(View.VISIBLE);
-            postButton.setVisibility(View.VISIBLE);
-            messageEditText.setVisibility(View.VISIBLE);
-        } else {
-            Intent intent = new Intent(MainActivity.this, StartPage.class);
-            startActivity(intent);
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+        VKAuthCallback callback = new VKAuthCallback() {
+            @Override
+            public void onLogin(@NotNull VKAccessToken vkAccessToken) {
+            }
+
+            @Override
+            public void onLoginFailed(int i) {
+
+            }
+        };
+        if (data == null || !VK.onActivityResult(requestCode, resultCode, data, callback)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
 }

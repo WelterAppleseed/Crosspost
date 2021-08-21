@@ -20,5 +20,6 @@
     <string name="facebook_app_id">591026155217324</string>
     <string name="fb_login_protocol_scheme">fb591026155217324</string>
     <string name="you_are_not_auth"><font size="14"><b>You are not authorizated. Please, authorizise with one of your accounts.</b></font></string>
+    <integer name="com_vk_sdk_AppId">7838662</integer>
 
 </resources>
