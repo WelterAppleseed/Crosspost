@@ -1,94 +1,128 @@
 package com.example.crossposter2.utils;
 
+import android.Manifest;
 import android.animation.Animator;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.os.FileUriExposedException;
 import android.os.Handler;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import android.widget.Toast;
 
-public class ImageUI {
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.example.crossposter2.MainActivity;
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.Permission;
+
+public class ImageUI extends Activity{
     private boolean touched;
     private final double dif_const = 0.00304615384;
     private float yCoOrdinate;
     private ViewPropertyAnimator viewPropertyAnimator, secViewPropertyAnimator;
+    private ResizeMode _resizeMode;
+    private ScaleMode _scaleMode;
+    private int _boxWidth = 250;
+    private int _boxHeight = 250;
+    private boolean _isRecycleSrcBitmap;
 
     public ImageUI() {
     }
 
-    public View.OnTouchListener getImageListener() {
-        View.OnTouchListener removeListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                touched = true;
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        v.getParent().requestDisallowInterceptTouchEvent(true);
-                        yCoOrdinate = v.getY() - event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        viewPropertyAnimator = v.animate().y((event.getRawY() + yCoOrdinate)).setDuration(0);
-                        viewPropertyAnimator.setListener(new Animator.AnimatorListener() {
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                double dif = Math.abs(v.getY()) * dif_const;
-                                double vision = (dif > 0.5) ? 0.5 : 1 - dif;
-                                v.setAlpha((float) vision);
-                            }
+    public Bitmap getScaleImage(Context context, Uri uri, int orientation) throws IOException {
+        Bitmap bm = null;
+        try {
+            InputStream in = context.getContentResolver().openInputStream(uri);
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(in, null, o);
+            in.close();
 
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
+            int origWidth = o.outWidth;
+            int origHeight = o.outHeight;
+            int bytesPerPixel = 2;
+            int maxSize = 480 * 800 * bytesPerPixel;
 
-                            }
+            int desiredWidth = 250;
+            int desiredHeight = 250;
 
-                            @Override
-                            public void onAnimationCancel(Animator animation) {
+            int desiredSize = desiredWidth * desiredHeight * bytesPerPixel;
+            if (desiredSize < maxSize) maxSize = desiredSize;
+            int scale = 1;
+            int origSize = origWidth * origHeight * bytesPerPixel;
 
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animator animation) {
-
-                            }
-
-                        });
-                        break;
-                    default:
-                        removeImg(v, v.getY());
-                        return false;
-                }
-                return true;
+            if (origWidth > origHeight) {
+                scale = Math.round((float) origHeight / (float) desiredHeight);
+            } else {
+                scale = Math.round((float) origWidth / (float) desiredWidth);
             }
-        };
-        return removeListener;
-    }
+            if (orientation == 90 || orientation == 270) {
+                origWidth = o.outHeight;
+                origHeight = o.outWidth;
+            } else {
+                origWidth = o.outWidth;
+                origHeight = o.outHeight;
+            }
+            while ((origWidth * origHeight * bytesPerPixel) * (1 / Math.pow(scale, 2)) > maxSize) {
+                scale++;
+            }
+            o = new BitmapFactory.Options();
+            o.inSampleSize = scale;
+            o.inPreferredConfig = Bitmap.Config.RGB_565;
 
-    private void removeImg(View view, float yCord) {
-        ViewPropertyAnimator delAnim;
-        Animation imageAnim = new Animation() {
-        };
-        if (view instanceof ImageView) {
-            try {
-                if (Math.abs(yCord) >= 350) {
-                    view.animate().alpha(0).setDuration(200).withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            view.setVisibility(View.GONE);
-                            ((ImageView) view).setImageResource(0);
-                            view.setY(0);
-                            view.setAlpha(1);
-                        }
-                    });
-                } else {
-                    view.animate().y(0).alpha(1).setDuration(100).start();
+            in = context.getContentResolver().openInputStream(uri);
+            bm = BitmapFactory.decodeStream(in, null, o);
+            in.close();
+            if (orientation > 0) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(orientation);
+                Bitmap decodedBitmap = bm;
+                bm = Bitmap.createBitmap(decodedBitmap, 0, 0, bm.getWidth(),
+                        bm.getHeight(), matrix, true);
+                if (decodedBitmap != null && !decodedBitmap.equals(bm)) {
+                    recycleBitmap(decodedBitmap);
                 }
+            }
+            return bm;
             } catch (Exception e) {
-                e.printStackTrace();
-            }
+            e.printStackTrace();
         }
+        return bm;
     }
-}
 
+    public static void recycleBitmap(Bitmap bitmap) {
+        if (bitmap == null || bitmap.isRecycled()) return;
+        bitmap.recycle();
+        System.gc();
+    }
+
+
+}
 

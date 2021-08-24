@@ -4,8 +4,13 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -16,14 +21,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
+import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,7 +46,10 @@ import com.example.crossposter2.account.Account;
 import com.example.crossposter2.account.Api;
 import com.example.crossposter2.fb.FbConstant;
 import com.example.crossposter2.tg.IsAppAvailable;
+import com.example.crossposter2.utils.ClickListeners;
+import com.example.crossposter2.utils.ImageManager;
 import com.example.crossposter2.utils.ImageUI;
+import com.example.crossposter2.utils.RealPathUtil;
 import com.example.crossposter2.vk.VKWallPostCommand;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
@@ -53,12 +66,17 @@ import com.vk.api.sdk.auth.VKAccessToken;
 import com.vk.api.sdk.auth.VKAuthCallback;
 import com.vk.api.sdk.auth.VKScope;
 
+
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
+    private final int BOX_WIDTH = 200;
+    private final int BOX_HEIGHT = 200;
     private final int SHOW_MESSENGERS_DIALOG = 2;
     private final int DIALOG_INPUT = 3;
     private final int LOGOUT_FORM = 4;
@@ -90,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
     Switch fS, tS, vS, oS;
     Button postButton, post, addImageButton;
     Button dialogButton;
-    View.OnTouchListener imgListener = new ImageUI().getImageListener();
+    View.OnTouchListener imgListener = new ClickListeners().getImageListener();
+    View.OnClickListener postListener = new ClickListeners().getPostClickListener(this);
     VKTokenExpiredHandler tokenHandler = new VKTokenExpiredHandler() {
         @Override
         public void onTokenExpired() {
@@ -101,48 +120,61 @@ public class MainActivity extends AppCompatActivity {
     Bitmap[] images = new Bitmap[5];
     EditText messageEditText;
     Account fbAccount = new Account();
-
     ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     int lenCount = 0;
                     Intent data = result.getData();
                     Bitmap bitmap = null;
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(270, 350);
+                    InputStream in;
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(BOX_WIDTH, BOX_HEIGHT);
                     try {
-                        String[] filePathColumn = {MediaStore.Images.Media.DATA};
                         imagesEncodedList = new ArrayList<String>();
+                        uris.clear();
                         if (data.getData() != null) {
                             Uri mImageUri = data.getData();
-                            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), mImageUri);
-                            imgGroup[lenCount].setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                            imgGroup[lenCount].setLayoutParams(params);
-                            imgGroup[lenCount].setVisibility(View.VISIBLE);
-                            imgGroup[lenCount].setColorFilter(515);
-                            imgGroup[lenCount].setImageBitmap(bitmap);
-                            images[lenCount] = bitmap;
+                            String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), mImageUri);
+                            int orientation = getCameraPhotoOrientation(getApplicationContext(), mImageUri, path);
+                            Bitmap bm = new ImageUI().getScaleImage(getApplicationContext(), mImageUri, orientation);
+                            ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
+                            Bitmap bem = imageManager
+                                    .setIsCrop(true)
+                                    .setIsScale(true)
+                                    .setIsResize(true)
+                                    .getFromBitmap(bm);
                             uris.add(mImageUri);
+                            imgGroup[lenCount].setLayoutParams(params);
+                            imgGroup[lenCount].setScaleType(ImageView.ScaleType.FIT_CENTER);
+                            imgGroup[lenCount].setVisibility(View.VISIBLE);
+                            imgGroup[lenCount].setImageBitmap(bem);
+                            images[lenCount] = bem;
                         } else {
                             if (data.getClipData() != null) {
                                 ClipData mClipData = data.getClipData();
-                                ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
                                 for (int i = 0; i < mClipData.getItemCount(); i++) {
                                     ClipData.Item item = mClipData.getItemAt(i);
                                     Uri uri = item.getUri();
-                                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                                    imgGroup[lenCount].setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                                    imgGroup[lenCount].setLayoutParams(params);
-                                    imgGroup[lenCount].setVisibility(View.VISIBLE);
-                                    imgGroup[lenCount].setColorFilter(515);
-                                    imgGroup[lenCount].setImageBitmap(bitmap);
-                                    images[lenCount] = bitmap;
+                                    String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), uri);
+                                    int orientation = getCameraPhotoOrientation(getApplicationContext(), uri, path);
+                                    Bitmap bm = new ImageUI().getScaleImage(getApplicationContext(), uri, orientation);
+                                    ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
+                                    Bitmap bem = imageManager
+                                            .setIsCrop(true)
+                                            .setIsScale(true)
+                                            .setIsResize(true)
+                                            .getFromBitmap(bm);
                                     uris.add(uri);
+                                    imgGroup[lenCount].setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                    imgGroup[lenCount].setVisibility(View.VISIBLE);
+                                    imgGroup[lenCount].setImageBitmap(bem);
+                                    images[lenCount] = bem;
                                     lenCount++;
                                 }
                                 imgLayout.setVisibility(View.VISIBLE);
-                                Log.v("LOG_TAG", "Selected Images " + mArrayUri.size());
+                                Log.v("LOG_TAG", "Selected Images " + uris.size());
                             }
                         }
                     } catch (Exception e) {
@@ -154,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
             });
 
     Api fbApi;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -172,6 +203,38 @@ public class MainActivity extends AppCompatActivity {
         //
         checkAuth();
     }
+
+    public int getCameraPhotoOrientation(Context context, Uri imageUri,
+                                         String imagePath) {
+        int rotate = 0;
+        try {
+            context.getContentResolver().notifyChange(imageUri, null);
+            File imageFile = new File(imagePath);
+            ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+            }
+
+            Log.i("RotateImage", "Exif orientation: " + orientation);
+            Log.i("RotateImage", "Rotate value: " + rotate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rotate;
+    }
+
     private void checkAuth() {
         if (!VK.isLoggedIn() && fbApi == null) {
             Intent intent = new Intent(MainActivity.this, StartPage.class);
@@ -180,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
             createUI();
         }
     }
+
     @Override
     protected Dialog onCreateDialog(int id) {
         if (id == SHOW_MESSENGERS_DIALOG) {
@@ -327,68 +391,7 @@ public class MainActivity extends AppCompatActivity {
                 showDialog(LOGOUT_FORM);
             }
         });
-        postButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Dialog switchDialog = new Dialog(MainActivity.this);
-                switchDialog.setContentView(R.layout.switches);
-                fS = (Switch) switchDialog.findViewById(R.id.facebook_switch);
-                vS = (Switch) switchDialog.findViewById(R.id.vk_switch);
-                tS = (Switch) switchDialog.findViewById(R.id.telegram_switch);
-                oS = (Switch) switchDialog.findViewById(R.id.unknown_switch);
-                //Getting switch states
-                switch_prf = getSharedPreferences("test", Context.MODE_PRIVATE);
-                facebook_switch_state = switch_prf.getBoolean("facebook_switch_state", false);
-                vk_switch_state = switch_prf.getBoolean("vk_switch_state", false);
-                telegram_switch_state = switch_prf.getBoolean("telegram_switch_state", false);
-                unknown_switch_state = switch_prf.getBoolean("unknown_switch_state", false);
-                //Setting checked
-                fS.setChecked(facebook_switch_state);
-                tS.setChecked(telegram_switch_state);
-                oS.setChecked(unknown_switch_state);
-                vS.setChecked(vk_switch_state);
-                switchDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        editor = getSharedPreferences("test", Context.MODE_PRIVATE).edit();
-                        editor.putBoolean("facebook_switch_state", fS.isChecked());
-                        editor.putBoolean("vk_switch_state", vS.isChecked());
-                        editor.putBoolean("telegram_switch_state", tS.isChecked());
-                        editor.putBoolean("unknown_switch_state", oS.isChecked());
-                        editor.apply();
-                        switchDialog.cancel();
-                    }
-                });
-                post = (Button) switchDialog.findViewById(R.id.post);
-                post.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (vS.isChecked()) {
-                                        System.out.println("VS");
-                                        //vkAction();
-                                    }
-                                    if (tS.isChecked()) {
-                                        System.out.println("TS");
-                                        //tgAction();
-                                    }
-                                    if (fS.isChecked()) {
-                                        System.out.println("FS");
-                                        //fbAction();
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }.start();
-                    }
-                });
-                switchDialog.show();
-            }
-        });
+        postButton.setOnClickListener(postListener);
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -398,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
         addImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uris.clear();
+                requestRead();
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -418,6 +421,7 @@ public class MainActivity extends AppCompatActivity {
             public void success(Integer integer) {
                 runOnUiThread(successRunnable);
             }
+
             @Override
             public void fail(@NotNull Exception e) {
                 e.printStackTrace();
@@ -497,6 +501,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+
+    public void requestRead() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        } else {
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            } else {
+                // Permission Denied
+                Toast.makeText(MainActivity.this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
 }
 
 
