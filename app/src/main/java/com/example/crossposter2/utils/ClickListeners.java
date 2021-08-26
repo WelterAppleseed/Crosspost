@@ -1,6 +1,8 @@
 package com.example.crossposter2.utils;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,7 +13,9 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 
 import com.example.crossposter2.MainActivity;
@@ -19,13 +23,15 @@ import com.example.crossposter2.R;
 
 public class ClickListeners {
     Switch fS, tS, vS, oS;
+    public static final int y = Utils.dpToPx(6);
     private boolean touched;
-    private final double dif_const = 0.00304615384;
+    private final double dif_const = 0.00588235294;
     private float yCoOrdinate;
     SharedPreferences.Editor editor;
     private ViewPropertyAnimator viewPropertyAnimator, secViewPropertyAnimator;
     SharedPreferences switch_prf;
     private ResizeMode _resizeMode;
+    LinearLayout parent;
     private ScaleMode _scaleMode;
     private int _boxWidth = 250;
     Button post;
@@ -33,7 +39,18 @@ public class ClickListeners {
     boolean facebook_switch_state, vk_switch_state, telegram_switch_state, unknown_switch_state;
     private boolean _isRecycleSrcBitmap;
 
-    public View.OnTouchListener getImageListener() {
+    public void scrollImageViewsListener(HorizontalScrollView scrollView) {
+        scrollView.scrollTo(30, 0);
+    }
+    public View.OnClickListener getReadyToImageListener(View.OnTouchListener listener) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.setOnTouchListener(listener);
+            }
+        };
+    }
+    public View.OnTouchListener getImageListener(LinearLayout layout) {
         return new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -49,7 +66,7 @@ public class ClickListeners {
                             @Override
                             public void onAnimationStart(Animator animation) {
                                 double dif = Math.abs(v.getY()) * dif_const;
-                                double vision = (dif > 0.5) ? 0.5 : 1 - dif;
+                                double vision = (dif > 0.7) ? 0.3 : 1 - dif;
                                 v.setAlpha((float) vision);
                             }
 
@@ -71,7 +88,7 @@ public class ClickListeners {
                         });
                         break;
                     default:
-                        removeImg(v, v.getY());
+                        removeImg(v, v.getY(), layout);
                         return false;
                 }
                 return true;
@@ -145,31 +162,26 @@ public class ClickListeners {
             }
         };
     }
-
-
-    private void removeImg(View view, float yCord) {
+    public void removeImg(View view, float yCord, LinearLayout imgLayout) {
         ViewPropertyAnimator delAnim;
         Animation imageAnim = new Animation() {
         };
         if (view instanceof ImageView) {
             try {
-                if (Math.abs(yCord) >= 350) {
+                if (Math.abs(yCord) >= 200) {
                     view.animate().alpha(0).setDuration(200).withEndAction(new Runnable() {
+                        @SuppressLint("ResourceType")
                         @Override
                         public void run() {
-                            view.setVisibility(View.GONE);
-                            ((ImageView) view).setImageResource(0);
-                            view.setY(0);
-                            view.setAlpha(1);
+                            imgLayout.removeView(view);
                         }
                     });
                 } else {
-                    view.animate().y(0).alpha(1).setDuration(100).start();
+                    view.animate().y(y).alpha(1).setDuration(100).start();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
-
-}
+    }

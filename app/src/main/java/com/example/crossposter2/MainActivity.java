@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -24,18 +25,18 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import android.provider.MediaStore;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -47,9 +48,11 @@ import com.example.crossposter2.account.Api;
 import com.example.crossposter2.fb.FbConstant;
 import com.example.crossposter2.tg.IsAppAvailable;
 import com.example.crossposter2.utils.ClickListeners;
+import com.example.crossposter2.utils.CrossposterDialogFragment;
 import com.example.crossposter2.utils.ImageManager;
 import com.example.crossposter2.utils.ImageUI;
 import com.example.crossposter2.utils.RealPathUtil;
+import com.example.crossposter2.utils.Utils;
 import com.example.crossposter2.vk.VKWallPostCommand;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
@@ -58,6 +61,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.widget.LoginButton;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vk.api.sdk.VK;
 import com.vk.api.sdk.VKApiCallback;
@@ -75,15 +79,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
-    private final int BOX_WIDTH = 200;
-    private final int BOX_HEIGHT = 200;
+    private final int BOX_WIDTH = 185;
+    private final int BOX_HEIGHT = 185;
     private final int SHOW_MESSENGERS_DIALOG = 2;
     private final int DIALOG_INPUT = 3;
     private final int LOGOUT_FORM = 4;
     private int imgCount = 5;
     private float xCoOrdinate, yCoOrdinate;
     private ArrayList<String> imagesEncodedList;
-    ImageView fi_im, se_im, th_im, fo_im, fv_im;
+    ImageView addImageIcon;
+    private HorizontalScrollView scrollView;
     ImageView[] imgGroup;
     private final String TAG = "Crossposter";
     private final int FACEBOOK_BUTTON = 4;
@@ -99,16 +104,19 @@ public class MainActivity extends AppCompatActivity {
     boolean facebook_switch_state, vk_switch_state, telegram_switch_state, unknown_switch_state;
     private CallbackManager callbackManager;
     private LoginButton loginButton;
-    Button logoutButton;
+    ImageButton logoutButton;
     ArrayList<Uri> uris = new ArrayList<>();
     LoginButton logoutButton1;
     ShareButton shareButton;
-    LinearLayout imgLayout;
+    public LinearLayout imgLayout;
     ShareDialog shareDialog;
     Switch fS, tS, vS, oS;
-    Button postButton, post, addImageButton;
-    Button dialogButton;
-    View.OnTouchListener imgListener = new ClickListeners().getImageListener();
+    ImageButton postButton;
+    FragmentManager manager;
+    Button addImageButton, post;
+    ImageButton dialogButton;
+    View.OnClickListener longClickListener;
+    View.OnTouchListener imgListener;
     View.OnClickListener postListener = new ClickListeners().getPostClickListener(this);
     VKTokenExpiredHandler tokenHandler = new VKTokenExpiredHandler() {
         @Override
@@ -123,64 +131,80 @@ public class MainActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
+                @SuppressLint("ResourceType")
                 @RequiresApi(api = Build.VERSION_CODES.N)
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    int lenCount = 0;
-                    Intent data = result.getData();
-                    Bitmap bitmap = null;
-                    InputStream in;
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(BOX_WIDTH, BOX_HEIGHT);
-                    try {
-                        imagesEncodedList = new ArrayList<String>();
-                        uris.clear();
-                        if (data.getData() != null) {
-                            Uri mImageUri = data.getData();
-                            String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), mImageUri);
-                            int orientation = getCameraPhotoOrientation(getApplicationContext(), mImageUri, path);
-                            Bitmap bm = new ImageUI().getScaleImage(getApplicationContext(), mImageUri, orientation);
-                            ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
-                            Bitmap bem = imageManager
-                                    .setIsCrop(true)
-                                    .setIsScale(true)
-                                    .setIsResize(true)
-                                    .getFromBitmap(bm);
-                            uris.add(mImageUri);
-                            imgGroup[lenCount].setLayoutParams(params);
-                            imgGroup[lenCount].setScaleType(ImageView.ScaleType.FIT_CENTER);
-                            imgGroup[lenCount].setVisibility(View.VISIBLE);
-                            imgGroup[lenCount].setImageBitmap(bem);
-                            images[lenCount] = bem;
-                        } else {
-                            if (data.getClipData() != null) {
-                                ClipData mClipData = data.getClipData();
-                                for (int i = 0; i < mClipData.getItemCount(); i++) {
-                                    ClipData.Item item = mClipData.getItemAt(i);
-                                    Uri uri = item.getUri();
-                                    String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), uri);
-                                    int orientation = getCameraPhotoOrientation(getApplicationContext(), uri, path);
-                                    Bitmap bm = new ImageUI().getScaleImage(getApplicationContext(), uri, orientation);
-                                    ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
-                                    Bitmap bem = imageManager
-                                            .setIsCrop(true)
-                                            .setIsScale(true)
-                                            .setIsResize(true)
-                                            .getFromBitmap(bm);
-                                    uris.add(uri);
-                                    imgGroup[lenCount].setScaleType(ImageView.ScaleType.FIT_CENTER);
-                                    imgGroup[lenCount].setVisibility(View.VISIBLE);
-                                    imgGroup[lenCount].setImageBitmap(bem);
-                                    images[lenCount] = bem;
-                                    lenCount++;
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        Bitmap bitmap = null;
+                        InputStream in;
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(BOX_WIDTH, BOX_HEIGHT);
+                        params.setMargins(Utils.dpToPx(10), Utils.dpToPx(6), 0, 0);
+                        ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
+                        imgListener = new ClickListeners().getImageListener(imgLayout);
+                        longClickListener = new ClickListeners().getReadyToImageListener(imgListener);
+                        try {
+                            imagesEncodedList = new ArrayList<String>();
+                            uris.clear();
+                            if (data.getData() != null) {
+                                Uri mImageUri = data.getData();
+                                String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), mImageUri);
+                                int orientation = getCameraPhotoOrientation(getApplicationContext(), mImageUri, path);
+                                Bitmap bm = new ImageUI().getScaleImage(getApplicationContext(), mImageUri, orientation);
+                                Bitmap bem = imageManager
+                                        .setIsCrop(true)
+                                        .setIsScale(true)
+                                        .setIsResize(true)
+                                        .getFromBitmap(bm);
+                                uris.add(mImageUri);
+                                ImageView imageView = new ImageView(getApplicationContext());
+                                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                imageView.setVisibility(View.VISIBLE);
+                                imageView.setImageBitmap(bem);
+                                imageView.setOnClickListener(longClickListener);
+                                imageView.setLayoutParams(params);
+                                imageView.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.rounded_corners));
+                                imageView.setForeground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.images_border));
+                                imageView.setClipToOutline(true);
+                                imgLayout.addView(imageView);
+                            } else {
+                                if (data.getClipData() != null) {
+                                    ClipData mClipData = data.getClipData();
+                                    for (int i = 0; i < mClipData.getItemCount(); i++) {
+                                        ClipData.Item item = mClipData.getItemAt(i);
+                                        Uri uri = item.getUri();
+                                        String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), uri);
+                                        int orientation = getCameraPhotoOrientation(getApplicationContext(), uri, path);
+                                        Bitmap bm = new ImageUI().getScaleImage(getApplicationContext(), uri, orientation);
+                                        Bitmap bem = imageManager
+                                                .setIsCrop(true)
+                                                .setIsScale(true)
+                                                .setIsResize(true)
+                                                .getFromBitmap(bm);
+                                        uris.add(uri);
+                                        ImageView imageView = new ImageView(getApplicationContext());
+                                        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                        imageView.setVisibility(View.VISIBLE);
+                                        imageView.setImageBitmap(bem);
+                                        imageView.setOnTouchListener(imgListener);
+                                        imageView.setLayoutParams(params);
+                                        imageView.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.rounded_corners));
+                                        imageView.setForeground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.images_border));
+                                        imageView.setClipToOutline(true);
+                                        imgLayout.addView(imageView);
+                                    }
+                                    imgLayout.setVisibility(View.VISIBLE);
+                                    Log.v("LOG_TAG", "Selected Images " + uris.size());
                                 }
-                                imgLayout.setVisibility(View.VISIBLE);
-                                Log.v("LOG_TAG", "Selected Images " + uris.size());
                             }
+                        } catch (Exception e) {
+                            Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG)
+                                    .show();
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG)
-                                .show();
-                        e.printStackTrace();
+                    } else {
+
                     }
                 }
             });
@@ -190,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        manager = getSupportFragmentManager();
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
         callbackManager = CallbackManager.Factory.create();
@@ -248,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     protected Dialog onCreateDialog(int id) {
         if (id == SHOW_MESSENGERS_DIALOG) {
             final String[] accounts = {"VK account", "Telegram account", "Facebook account"};
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Base_Crossposter_AlertDialog));
             builder
                     .setTitle("Connect with...")
                     .setItems(accounts, new DialogInterface.OnClickListener() {
@@ -366,24 +390,22 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     public void createUI() {
-        dialogButton = (Button) findViewById(R.id.dialog_button);
-        addImageButton = (Button) findViewById(R.id.add_image);
-
-        fi_im = (ImageView) findViewById(R.id.fi);
-        fi_im.setOnTouchListener(imgListener);
-        se_im = (ImageView) findViewById(R.id.se);
-        se_im.setOnTouchListener(imgListener);
-        th_im = (ImageView) findViewById(R.id.th);
-        th_im.setOnTouchListener(imgListener);
-        fo_im = (ImageView) findViewById(R.id.fo);
-        fo_im.setOnTouchListener(imgListener);
-        fv_im = (ImageView) findViewById(R.id.fv);
-        fv_im.setOnTouchListener(imgListener);
-
-        imgGroup = new ImageView[]{fi_im, se_im, th_im, fo_im, fv_im};
+        dialogButton = (ImageButton) findViewById(R.id.dialog_button);
         imgLayout = (LinearLayout) findViewById(R.id.img_layout);
-        logoutButton = (Button) findViewById(R.id.log_out);
-        postButton = (Button) findViewById(R.id.send_post);
+        logoutButton = (ImageButton) findViewById(R.id.log_out);
+        addImageIcon = (ImageView) findViewById(R.id.add);
+        addImageIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestRead();
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                addImageLauncher.launch(intent);
+            }
+        });
+        postButton = (ImageButton) findViewById(R.id.send_post);
         messageEditText = (EditText) findViewById(R.id.edit_msg);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -395,21 +417,13 @@ public class MainActivity extends AppCompatActivity {
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDialog(SHOW_MESSENGERS_DIALOG);
-            }
+                CrossposterDialogFragment fragment = new CrossposterDialogFragment(MainActivity.this, vk, fbApi);
+                fragment.show(manager, "My Dialog");
+                }
         });
-        addImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requestRead();
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                addImageLauncher.launch(intent);
-            }
-        });
+        scrollView = (HorizontalScrollView) findViewById(R.id.scroll_image_views);
     }
+
 
     public void onVkClick() {
         VK.login(this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
@@ -500,7 +514,6 @@ public class MainActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
     public void requestRead() {

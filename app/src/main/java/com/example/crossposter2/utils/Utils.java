@@ -1,4 +1,6 @@
 package com.example.crossposter2.utils;
+import android.content.res.Resources;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,5 +56,13 @@ public class Utils {
         if (!m.find())
             return null;
         return m.group(2);
+    }
+    public static int dpToPx(int dp)
+    {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+    public static int pxToDp(int px)
+    {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 }

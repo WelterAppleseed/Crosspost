@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Matrix;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -265,9 +267,6 @@ public final class ImageManager {
         } else {
             _boxWidth = _boxHeight;
         }
-        Log.i("X", Integer.toString(croppedX));
-        Log.i("Y", Integer.toString(croppedY));
-        System.out.println(sourceBitmap.getWidth() + " " + _boxWidth + " " + croppedX);
         if (croppedX == 0 && croppedY == 0)
             return sourceBitmap;
 

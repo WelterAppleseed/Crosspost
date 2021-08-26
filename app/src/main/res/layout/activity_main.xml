@@ -7,6 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/edit"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -18,9 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="28dp" />
 
 
         <LinearLayout
@@ -37,27 +36,36 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/button8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageButton
+                    android:id="@+id/warning_button"
+                    style="@style/Widget.Crossposter.Button"
+                    android:layout_width="30dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:scaleX="0.85"
                     android:layout_weight="1"
+                    android:background="@drawable/warning"
                     android:text="Button" />
 
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="5" />
 
-                <Button
-                    android:id="@+id/button9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                <ImageButton
+                    android:id="@+id/question_button"
+                    android:layout_width="30dp"
+                    android:adjustViewBounds="false"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="20dp"
                     android:layout_weight="1"
+                    android:scaleX="0.85"
+                    android:background="@drawable/doubts_button"
                     android:text="Button" />
 
             </LinearLayout>
@@ -71,106 +79,77 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
                     android:layout_weight="1"
-                    android:background="#DCE3DC"
+                    android:background="@drawable/edit"
                     android:clipChildren="false"
                     android:orientation="vertical">
 
-                    <EditText
-                        android:id="@+id/edit_msg"
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="textPersonName" />
+                        android:layout_weight="1">
 
-                    <HorizontalScrollView
+                        <EditText
+                            android:id="@+id/edit_msg"
+                            style="@style/Widget.Crossposter.EditText"
+                            android:background="@color/colorInvisible"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="15dp"
+                            android:layout_marginEnd="15dp"
+                            android:layout_marginBottom="10dp" />
+                    </FrameLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
-                        android:clipChildren="true">
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/scrollview_borders"
+                        android:orientation="horizontal">
 
-                        <LinearLayout
-                            android:id="@+id/img_layout"
+                        <FrameLayout
                             android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center">
+
+                            <ImageButton
+                                android:id="@+id/add"
+                                android:layout_width="70dp"
+                                android:layout_height="72dp"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:backgroundTint="#FFFFFF"
+                                android:scaleType="fitCenter"
+                                android:scaleX="1.5"
+                                android:scaleY="1.5"
+                                android:src="@drawable/plus" />
+                        </FrameLayout>
+
+                        <HorizontalScrollView
+                            android:id="@+id/scroll_image_views"
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:clipChildren="false"
-                            android:orientation="horizontal">
+                            android:layout_marginStart="5dp"
+                            android:fadeScrollbars="false"
+                            android:scrollbarThumbHorizontal="@drawable/scrollbar"
+                            android:scrollbars="horizontal"
+                            android:scrollbarSize="2dp"
+                            android:clipChildren="true">
 
-                            <ImageView
-                                android:id="@+id/fi"
-                                android:layout_width="70dp"
-                                android:layout_height="70dp"
-                                android:layout_marginStart="10dp"
-                                android:layout_weight="5"
-                                android:adjustViewBounds="false"
-                                android:clickable="true"
-                                android:focusable="true"
-                                app:srcCompat="@drawable/ic_launcher_background"
-                                facebook:srcCompat="@drawable/edit" />
+                            <LinearLayout
+                                android:id="@+id/img_layout"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:clipChildren="true"
+                                android:orientation="horizontal" />
+                        </HorizontalScrollView>
 
-                            <Space
-                                android:layout_width="10dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5" />
-
-                            <ImageView
-                                android:id="@+id/se"
-                                android:layout_width="70dp"
-                                android:layout_height="70dp"
-                                android:layout_weight="5"
-                                android:adjustViewBounds="false"
-                                android:clickable="true"
-                                android:focusable="true"
-                                facebook:srcCompat="@drawable/edit" />
-
-                            <Space
-                                android:layout_width="10dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5" />
-
-                            <ImageView
-                                android:id="@+id/th"
-                                android:layout_width="70dp"
-                                android:layout_height="70dp"
-                                android:layout_weight="5"
-                                android:adjustViewBounds="false"
-                                android:clickable="true"
-                                android:focusable="true"
-                                facebook:srcCompat="@drawable/edit" />
-
-                            <Space
-                                android:layout_width="10dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5" />
-
-                            <ImageView
-                                android:id="@+id/fo"
-                                android:layout_width="70dp"
-                                android:layout_height="70dp"
-                                android:layout_weight="5"
-                                android:adjustViewBounds="false"
-                                android:clickable="true"
-                                android:focusable="true"
-                                facebook:srcCompat="@drawable/edit" />
-
-                            <Space
-                                android:layout_width="10dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5" />
-
-                            <ImageView
-                                android:id="@+id/fv"
-                                android:layout_width="70dp"
-                                android:layout_height="70dp"
-                                android:layout_weight="5"
-                                android:adjustViewBounds="false"
-                                android:clickable="true"
-                                android:focusable="true"
-                                facebook:srcCompat="@drawable/edit" />
-
-                        </LinearLayout>
-                    </HorizontalScrollView>
+                    </LinearLayout>
 
                     <Space
                         android:layout_width="match_parent"
@@ -178,97 +157,84 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="3"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/add_image"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="25dp"
-                        android:layout_weight="1"
-                        android:text="Add image" />
-
-                    <Button
-                        android:id="@+id/button4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="25dp"
-                        android:layout_weight="1"
-                        android:text="Button" />
-
-                    <Button
-                        android:id="@+id/button5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="25dp"
-                        android:layout_weight="1"
-                        android:text="Button" />
-
-                    <Button
-                        android:id="@+id/button7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="25dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_weight="1"
-                        android:text="Button" />
-
-                </LinearLayout>
+                <Space
+                    android:layout_height="200dp"
+                    android:layout_weight="2"
+                    android:layout_width="wrap_content" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:gravity="bottom"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/log_out"
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="25dp"
-                    android:layout_weight="1"
-                    android:text="Выход" />
+                    android:layout_gravity="top"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/log_out"
+                        style="@style/Widget.Crossposter.Button"
+                        android:layout_width="54dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:background="@drawable/logout"
+                        android:src="@drawable/logout" />
+                </FrameLayout>
 
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
-                <Button
-                    android:id="@+id/dialog_button"
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="25dp"
-                    android:layout_weight="1"
-                    android:text="conn" />
+                    android:layout_gravity="top"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/dialog_button"
+                        style="@style/Widget.Crossposter.Button"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:background="@drawable/accounts" />
+                </FrameLayout>
 
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
-                <Button
-                    android:id="@+id/send_post"
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="25dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_weight="1"
-                    android:text="Send Post" />
+                    android:layout_gravity="top"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/send_post"
+                        style="@style/Widget.Crossposter.Button"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:background="@drawable/direct" />
+                </FrameLayout>
+
             </LinearLayout>
 
 
         </LinearLayout>
-
     </LinearLayout>
+    <include layout="@layout/bottom_sheet"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

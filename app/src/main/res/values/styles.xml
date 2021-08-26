@@ -1,23 +1,36 @@
 <resources>
-
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/color_primary</item>
-        <item name="colorPrimaryVariant">@color/color_primary_variant</item>
-        <item name="colorSecondary">@color/color_secondary</item>
-        <item name="colorSecondaryVariant">@color/color_secondary_variant</item>
-        <item name="shapeAppearanceSmallComponent">
-            @style/ShapeAppearance.MaterialComponents.SmallComponent
-        </item>
+    <style name="MyTheme2" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- ... -->
+        <item name="shapeAppearanceSmallComponent">@style/Widget.Crossposter.SmallShapeAppearance.</item>
     </style>
 
-    <style name="Widget.MyApp.SmallShapeAppearance" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+    <style name="Widget.Crossposter.SmallShapeAppearance." parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerFamilyTopLeft">rounded</item>
         <item name="cornerFamilyBottomRight">cut</item>
         <item name="cornerSizeTopLeft">20dp</item>
         <item name="cornerSizeBottomRight">15dp</item>
+        <item name="buttonStyle">@style/Widget.Crossposter.Button</item>
+        <item name="editTextStyle">@style/Widget.Crossposter.EditText</item>
+        <item name="alertDialogStyle">@style/Base.Crossposter.AlertDialog</item>
         <!--<item name="cornerFamily">cut</item>-->
         <!--<item name="cornerSize">8dp</item>-->
+    </style>
+    <style name="Widget.Crossposter.Button" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/colorBlack</item>
+        <item name="cornerFamily">cut</item>
+    </style>
+    <style name="Widget.Crossposter.EditText" parent="Widget.AppCompat.EditText">
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeColor">#FFF</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="boxBackgroundColor">#FFF</item>
+    </style>
+    <style name="Base.Crossposter.AlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColorPrimary">@color/darkThemeBackground</item>
+        <item name="android:background">#FFFFFF</item>
+        <item name="cornerFamilyBottomLeft">rounded</item>
+        <item name="cornerFamilyBottomRight">rounded</item>
+        <item name="cornerFamilyTopLeft">rounded</item>
+        <item name="cornerFamilyTopRight">rounded</item>
     </style>
 </resources>
