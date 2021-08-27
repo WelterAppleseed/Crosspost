@@ -5,18 +5,15 @@
     </style>
 
     <style name="Widget.Crossposter.SmallShapeAppearance." parent="ShapeAppearance.MaterialComponents.SmallComponent">
-        <item name="cornerFamilyTopLeft">rounded</item>
-        <item name="cornerFamilyBottomRight">cut</item>
-        <item name="cornerSizeTopLeft">20dp</item>
-        <item name="cornerSizeBottomRight">15dp</item>
         <item name="buttonStyle">@style/Widget.Crossposter.Button</item>
         <item name="editTextStyle">@style/Widget.Crossposter.EditText</item>
         <item name="alertDialogStyle">@style/Base.Crossposter.AlertDialog</item>
-        <!--<item name="cornerFamily">cut</item>-->
-        <!--<item name="cornerSize">8dp</item>-->
+        <item name="switchStyle">@style/Widget.Crossposter.Switch</item>
+        <item name="cornerFamily">cut</item>
+        -<item name="cornerSize">8dp</item>
     </style>
     <style name="Widget.Crossposter.Button" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/colorBlack</item>
+        <item name="background">@drawable/button_borders</item>
         <item name="cornerFamily">cut</item>
     </style>
     <style name="Widget.Crossposter.EditText" parent="Widget.AppCompat.EditText">
@@ -33,4 +30,20 @@
         <item name="cornerFamilyTopLeft">rounded</item>
         <item name="cornerFamilyTopRight">rounded</item>
     </style>
+    <style name="Widget.Crossposter.Switch" parent="Theme.AppCompat.Light">
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/colorBlack</item>
+
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/colorBlack</item>
+
+        <!-- colorAccent is used as the default value for colorControlActivated,
+             which is used to tint widgets -->
+        <item name="colorAccent">@color/colorBlack</item>
+
+        <!-- You can also set colorControlNormal, colorControlActivated
+             colorControlHighlight, and colorSwitchThumbNormal. -->
+
+    </style>
+
 </resources>

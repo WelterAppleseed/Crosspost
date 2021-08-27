@@ -35,10 +35,12 @@ import android.view.View;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -55,13 +57,16 @@ import com.example.crossposter2.utils.RealPathUtil;
 import com.example.crossposter2.utils.Utils;
 import com.example.crossposter2.vk.VKWallPostCommand;
 import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vk.api.sdk.VK;
 import com.vk.api.sdk.VKApiCallback;
@@ -72,13 +77,26 @@ import com.vk.api.sdk.auth.VKScope;
 
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
+    //test
+    ImageButton btn_camera;
+    ImageButton btn_mic;
+    LinearLayout logToolbarShow, addToolbarShow, postToolbarShow;
+    LinearLayout[] container;
+    RelativeLayout logToolbar, addToolbar, postToolbar;
+    RelativeLayout[] content;
+
+
     private final int BOX_WIDTH = 185;
     private final int BOX_HEIGHT = 185;
     private final int SHOW_MESSENGERS_DIALOG = 2;
@@ -101,23 +119,22 @@ public class MainActivity extends AppCompatActivity {
     private long fb_user_id, vk_user_id;
     EditText input;
     private ArrayList<Bitmap> bitmaps;
-    boolean facebook_switch_state, vk_switch_state, telegram_switch_state, unknown_switch_state;
+    boolean facebook_switch_state, vk_switch_state, twitter_switch_state;
     private CallbackManager callbackManager;
-    private LoginButton loginButton;
-    ImageButton logoutButton;
+    private LoginButton connectFbPerformedButton;
+    ImageButton logoutSectionButton, connectSectionButton, postSectionButton;
     ArrayList<Uri> uris = new ArrayList<>();
-    LoginButton logoutButton1;
-    ShareButton shareButton;
-    public LinearLayout imgLayout;
+    FrameLayout logFr, addFr, postFr;
+    public LinearLayout imgLayout, bottomButtonsLayout;
     ShareDialog shareDialog;
     Switch fS, tS, vS, oS;
     ImageButton postButton;
     FragmentManager manager;
+    Button connectVk, connectTw, connectFb, logoutVk, logoutTw, logoutFb, sendPostB;
     Button addImageButton, post;
     ImageButton dialogButton;
     View.OnClickListener longClickListener;
     View.OnTouchListener imgListener;
-    View.OnClickListener postListener = new ClickListeners().getPostClickListener(this);
     VKTokenExpiredHandler tokenHandler = new VKTokenExpiredHandler() {
         @Override
         public void onTokenExpired() {
@@ -225,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
         //VK
         VK.addTokenExpiredHandler(tokenHandler);
         //
+        setToolbarY();
         checkAuth();
     }
 
@@ -267,109 +285,13 @@ public class MainActivity extends AppCompatActivity {
             createUI();
         }
     }
-
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        if (id == SHOW_MESSENGERS_DIALOG) {
-            final String[] accounts = {"VK account", "Telegram account", "Facebook account"};
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Base_Crossposter_AlertDialog));
-            builder
-                    .setTitle("Connect with...")
-                    .setItems(accounts, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    assert accounts != null;
-                                    switch (accounts[which]) {
-                                        case "VK account": {
-                                            onVkClick();
-                                            break;
-                                        }
-                                        case "Telegram account": {
-                                            onTgClick();
-                                            break;
-                                        }
-                                        case "Facebook account": {
-                                            onFbClick();
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                    );
-            return builder.create();
-        }
-        if (id == LOGOUT_FORM) {
-            final String[] logoutFrom = {"VK", "Telegram", "Facebook"};
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder
-                    .setTitle("Log out from...")
-                    .setItems(logoutFrom, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            assert logoutFrom != null;
-                            switch (logoutFrom[which]) {
-                                case "VK": {
-                                    if (VK.isLoggedIn()) {
-                                        Toast.makeText(getApplicationContext(), "You have logged out of your VK account", Toast.LENGTH_LONG).show();
-                                        VK.logout();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "You are not authorized with VK", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                                case "Telegram": {
-                                    //tgAction();
-                                    break;
-                                }
-                                case "Facebook": {
-                                    if (fbApi != null) {
-                                        fbApi = null;
-                                        fbAccount.access_token_fb = null;
-                                        fbAccount.user_id_fb = 0;
-                                        fbAccount.saveFb(MainActivity.this);
-                                        LoginManager.getInstance().logOut();
-                                        Toast.makeText(getApplicationContext(), "You have logged out of your Facebook account", Toast.LENGTH_SHORT).show();
-                                        break;
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "You are not authorized with Facebook", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            }
-                            checkAuth();
-                        }
-                    });
-            return builder.create();
-        }
-        if (id == DIALOG_INPUT) {
-            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            input = new EditText(this);
-            input.setHint("Type here...");
-            token_prf = getPreferences(MODE_PRIVATE);
-            String savedText = token_prf.getString(SAVED_TG_CHANNEL, "");
-            input.setText(savedText);
-            Toast.makeText(this, "Text loaded", Toast.LENGTH_SHORT).show();
-            alertDialog.setTitle(R.string.tg_dialog_title);
-            alertDialog.setMessage(R.string.tg_dialog_example);
-            alertDialog.setView(input);
-            alertDialog.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    token_prf = getPreferences(MODE_PRIVATE);
-                    SharedPreferences.Editor ed = token_prf.edit();
-                    ed.putString(SAVED_TG_CHANNEL, input.getText().toString());
-                    ed.apply();
-                    Toast.makeText(getApplicationContext(), "Channel name saved", Toast.LENGTH_SHORT).show();
-                }
-            });
-            alertDialog.create();
-            alertDialog.show();
-        }
-        if (id == FACEBOOK_BUTTON) {
-            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.create();
-            alertDialog.show();
-        }
-
-        return null;
+    public void setToolbarY() {
+        logToolbarShow = (LinearLayout) findViewById(R.id.log_show);
+        addToolbarShow = (LinearLayout) findViewById(R.id.add_show);
+        postToolbarShow = (LinearLayout) findViewById(R.id.post_show);
+        logToolbarShow.setY(Utils.dpToPx(110));
+        addToolbarShow.setY(Utils.dpToPx(110));
+        postToolbarShow.setY(Utils.dpToPx(110));
     }
 
     private void fbRestore() {
@@ -381,18 +303,229 @@ public class MainActivity extends AppCompatActivity {
             fbAccount.user_id_fb = fb_user_id;
             fbAccount.saveFb(MainActivity.this);
             fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
+            getIntent().removeExtra("access_token_fb");
+            getIntent().removeExtra("user_id_fb");
         }
         fbAccount.restoreFb(this);
         if (fbAccount.access_token_fb != null) {
             fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
         }
     }
+    public void createToolbarUI() {
+        logToolbar = (RelativeLayout) findViewById(R.id.log_toolbar);
+        addToolbar = (RelativeLayout) findViewById(R.id.add_toolbar);
+        postToolbar = (RelativeLayout) findViewById(R.id.post_toolbar);
+        content = new RelativeLayout[]{logToolbar, addToolbar, postToolbar};
+        container = new LinearLayout[]{logToolbarShow, addToolbarShow, postToolbarShow};
+
+        //Getting are they checked
+
+        switch_prf = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE);
+        facebook_switch_state = switch_prf.getBoolean("facebook_switch_state", false);
+        vk_switch_state = switch_prf.getBoolean("vk_switch_state", false);
+        twitter_switch_state = switch_prf.getBoolean("twitter_switch_state", false);
+        //Setting result
+
+        fS = (Switch) findViewById(R.id.facebook_switch);
+        vS = (Switch) findViewById(R.id.vk_switch);
+        tS = (Switch) findViewById(R.id.twitter_switch);
+
+        logoutVk = (Button) findViewById(R.id.logout_vk);
+        logoutTw = (Button) findViewById(R.id.log_out_twitter);
+        logoutFb = (Button) findViewById(R.id.log_out_facebook);
+
+        connectVk = (Button) findViewById(R.id.add_vk);
+        connectTw = (Button) findViewById(R.id.add_twitter);
+        connectFb = (Button) findViewById(R.id.add_facebook);
+        connectFbPerformedButton = (LoginButton) findViewById(R.id.perform_login_button);
+        connectFbPerformedButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                String[] info = {"id", "name", "email", "gender", "birthday"};
+                String accessToken = loginResult.getAccessToken()
+                        .getToken();
+                Log.i("accessToken", accessToken);
+
+                //        GraphRequest request = GraphRequest.newMeRequest(
+                //                loginResult.getAccessToken(),
+                //                new GraphRequest.GraphJSONObjectCallback() {@Override
+                //                public void onCompleted(JSONObject object,
+                //                                         GraphResponse response) {
+                //
+                //                    Log.i("LoginActivity",
+                //                              response.toString());
+                //                     try {
+                //                          info[0] = object.getString("id");
+                //                         try {
+                //                             URL profile_pic = new URL(
+                //                                     "http://graph.facebook.com/" + info[0] + "/picture?type=large");
+                //                             Log.i("profile_pic",
+                //                                     profile_pic + "");
+                //
+                //                          } catch (MalformedURLException e) {
+                //                              e.printStackTrace();
+                //                          }
+                //                          info[1] = object.getString("name");
+                //                          info[2]= object.getString("email");
+                //                          info[3] = object.getString("gender");
+                //                          info[4] = object.getString("birthday");
+                //                      } catch (JSONException e) {
+                //                           e.printStackTrace();
+                //                        }
+                //                    }
+                //                     });
+                //            Bundle parameters = new Bundle();
+                //            parameters.putString("fields",
+                //                    "id,name,email,gender, birthday");
+                //           request.setParameters(parameters);
+                //          request.executeAsync();
+                fbAccount.access_token_fb = accessToken;
+                //fbAccount.user_id_fb = Long.parseLong(info[0]);
+                fbAccount.saveFb(MainActivity.this);
+                fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
+
+                fS.setEnabled(true);
+                connectFb.setEnabled(false);
+                connectFb.setClickable(false);
+                logoutFb.setEnabled(true);
+                logoutFb.setClickable(true);
+                connectFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
+        if (fbApi == null) {
+            fS.setClickable(false);
+            fS.setFocusable(false);
+            fS.setEnabled(false);
+            logoutFb.setEnabled(false);
+            logoutFb.setClickable(false);
+            logoutFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        } else {
+            fS.setChecked(facebook_switch_state);
+            fS.setEnabled(true);
+            connectFb.setEnabled(false);
+            connectFb.setClickable(false);
+            connectFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        }
+        if (!VK.isLoggedIn()) {
+            vS.setClickable(false);
+            vS.setFocusable(false);
+            vS.setEnabled(false);
+            logoutVk.setEnabled(false);
+            logoutVk.setClickable(false);
+            logoutVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        } else {
+            vS.setChecked(vk_switch_state);
+            vS.setEnabled(true);
+            connectVk.setEnabled(false);
+            connectVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        }
+        tS.setClickable(true);
+        tS.setFocusable(true);
+        tS.setBackgroundColor(getResources().getColor(R.color.colorBlack));
+        logoutTw.setEnabled(false);
+        logoutTw.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        connectTw.setEnabled(false);
+        connectTw.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+
+        logoutVk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                VK.logout();
+                vS.setClickable(false);
+                vS.setFocusable(false);
+                vS.setEnabled(false);
+                logoutVk.setEnabled(false);
+                logoutVk.setClickable(false);
+                logoutVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+                connectVk.setEnabled(true);
+                connectVk.setClickable(true);
+                checkAuth();
+            }
+        });
+        logoutFb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fbApi = null;
+                fbAccount.access_token_fb = null;
+                fbAccount.user_id_fb = 0;
+                fbAccount.saveFb(MainActivity.this);
+                LoginManager.getInstance().logOut();
+                fS.setClickable(false);
+                fS.setFocusable(false);
+                fS.setEnabled(false);
+                logoutFb.setEnabled(false);
+                logoutFb.setClickable(false);
+                connectFb.setEnabled(true);
+                connectFb.setClickable(true);
+                logoutFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+                checkAuth();
+            }
+        });
+        connectVk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onVkClick();
+            }
+        });
+        connectFb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onFbClick();
+            }
+        });
+        post = (Button) findViewById(R.id.btn_post);
+        post.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (vS.isChecked()) {
+                                System.out.println("VS");
+                                //vkAction();
+                            }
+                            if (tS.isChecked()) {
+                                System.out.println("TS");
+                                //tgAction();
+                            }
+                            if (fS.isChecked()) {
+                                System.out.println("FS");
+                                fbAction();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     public void createUI() {
-        dialogButton = (ImageButton) findViewById(R.id.dialog_button);
+        createToolbarUI();
+        logoutSectionButton = (ImageButton) findViewById(R.id.log_out);
+        connectSectionButton = (ImageButton) findViewById(R.id.add_button);
+        postSectionButton = (ImageButton) findViewById(R.id.send_post);
+
+        logoutSectionButton.setOnClickListener(new ClickListeners().testPostLis(container, logToolbarShow, content, logToolbar));
+        connectSectionButton.setOnClickListener(new ClickListeners().testPostLis(container, addToolbarShow, content, addToolbar));
+        postSectionButton.setOnClickListener(new ClickListeners().testPostLis(container, postToolbarShow, content, postToolbar));
+
         imgLayout = (LinearLayout) findViewById(R.id.img_layout);
-        logoutButton = (ImageButton) findViewById(R.id.log_out);
         addImageIcon = (ImageView) findViewById(R.id.add);
         addImageIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -405,25 +538,10 @@ public class MainActivity extends AppCompatActivity {
                 addImageLauncher.launch(intent);
             }
         });
-        postButton = (ImageButton) findViewById(R.id.send_post);
         messageEditText = (EditText) findViewById(R.id.edit_msg);
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialog(LOGOUT_FORM);
-            }
-        });
-        postButton.setOnClickListener(postListener);
-        dialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CrossposterDialogFragment fragment = new CrossposterDialogFragment(MainActivity.this, vk, fbApi);
-                fragment.show(manager, "My Dialog");
-                }
-        });
-        scrollView = (HorizontalScrollView) findViewById(R.id.scroll_image_views);
-    }
+        bottomButtonsLayout = (LinearLayout) findViewById(R.id.bottom_buttons_layout);
 
+    }
 
     public void onVkClick() {
         VK.login(this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
@@ -469,7 +587,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onFbClick() {
-        loginButton.performClick();
+        connectFbPerformedButton.performClick();
     }
 
     public void fbAction() {
@@ -503,6 +621,13 @@ public class MainActivity extends AppCompatActivity {
         VKAuthCallback callback = new VKAuthCallback() {
             @Override
             public void onLogin(@NotNull VKAccessToken vkAccessToken) {
+                vS.setEnabled(true);
+                vS.setClickable(true);
+                connectVk.setClickable(false);
+                connectVk.setEnabled(false);
+                logoutVk.setClickable(true);
+                logoutVk.setEnabled(true);
+                connectVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
             }
 
             @Override
@@ -514,7 +639,23 @@ public class MainActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        editor = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE).edit();
+        editor.putBoolean("facebook_switch_state", fS.isChecked());
+        editor.putBoolean("vk_switch_state", vS.isChecked());
+        editor.putBoolean("twitter_switch_state", tS.isChecked());
+        editor.apply();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
     public void requestRead() {
         if (ContextCompat.checkSelfPermission(this,

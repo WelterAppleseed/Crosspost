@@ -12,229 +12,550 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-
+        <com.facebook.share.widget.ShareButton
+            android:id="@+id/test_b"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_weight="1.8"
+            android:orientation="horizontal">
 
-            <com.facebook.share.widget.ShareButton
-                android:id="@+id/test_b"
+            <ImageButton
+                android:id="@+id/warning_button"
+                android:layout_width="30dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"
+                android:background="@drawable/warning"
+                android:scaleX="0.85"
+                android:text="Button" />
+
+            <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:layout_weight="5" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/warning_button"
-                    style="@style/Widget.Crossposter.Button"
-                    android:layout_width="30dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="20dp"
-                    android:scaleX="0.85"
-                    android:layout_weight="1"
-                    android:background="@drawable/warning"
-                    android:text="Button" />
-
-                <Space
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5" />
-
-                <ImageButton
-                    android:id="@+id/question_button"
-                    android:layout_width="30dp"
-                    android:adjustViewBounds="false"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="20dp"
-                    android:layout_weight="1"
-                    android:scaleX="0.85"
-                    android:background="@drawable/doubts_button"
-                    android:text="Button" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <ImageButton
+                android:id="@+id/question_button"
+                android:layout_width="30dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="20dp"
                 android:layout_weight="1"
+                android:adjustViewBounds="false"
+                android:background="@drawable/doubts_button"
+                android:scaleX="0.85"
+                android:text="Button" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit"
+                android:clipChildren="false"
                 android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <EditText
+                        android:id="@+id/edit_msg"
+                        style="@style/Widget.Crossposter.EditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/colorInvisible" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/edit"
-                    android:clipChildren="false"
-                    android:orientation="vertical">
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="3"
+                    android:background="@drawable/scrollview_borders"
+                    android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center">
 
-                        <EditText
-                            android:id="@+id/edit_msg"
-                            style="@style/Widget.Crossposter.EditText"
-                            android:background="@color/colorInvisible"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="15dp"
-                            android:layout_marginTop="15dp"
-                            android:layout_marginEnd="15dp"
-                            android:layout_marginBottom="10dp" />
+                        <ImageButton
+                            android:id="@+id/add"
+                            android:layout_width="70dp"
+                            android:layout_height="72dp"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:backgroundTint="#FFFFFF"
+                            android:scaleType="fitCenter"
+                            android:scaleX="1.5"
+                            android:scaleY="1.5"
+                            android:src="@drawable/plus" />
                     </FrameLayout>
 
-                    <LinearLayout
+                    <HorizontalScrollView
+                        android:id="@+id/scroll_image_views"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="3"
-                        android:layout_marginStart="15dp"
-                        android:layout_marginEnd="10dp"
-                        android:background="@drawable/scrollview_borders"
-                        android:orientation="horizontal">
+                        android:layout_marginStart="5dp"
+                        android:clipChildren="true"
+                        android:fadeScrollbars="false"
+                        android:scrollbarSize="2dp"
+                        android:scrollbarThumbHorizontal="@drawable/scrollbar"
+                        android:scrollbars="horizontal">
 
-                        <FrameLayout
+                        <LinearLayout
+                            android:id="@+id/img_layout"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center">
-
-                            <ImageButton
-                                android:id="@+id/add"
-                                android:layout_width="70dp"
-                                android:layout_height="72dp"
-                                android:layout_gravity="center"
-                                android:layout_weight="1"
-                                android:backgroundTint="#FFFFFF"
-                                android:scaleType="fitCenter"
-                                android:scaleX="1.5"
-                                android:scaleY="1.5"
-                                android:src="@drawable/plus" />
-                        </FrameLayout>
-
-                        <HorizontalScrollView
-                            android:id="@+id/scroll_image_views"
-                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginStart="5dp"
-                            android:fadeScrollbars="false"
-                            android:scrollbarThumbHorizontal="@drawable/scrollbar"
-                            android:scrollbars="horizontal"
-                            android:scrollbarSize="2dp"
-                            android:clipChildren="true">
-
-                            <LinearLayout
-                                android:id="@+id/img_layout"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:clipChildren="true"
-                                android:orientation="horizontal" />
-                        </HorizontalScrollView>
-
-                    </LinearLayout>
-
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp" />
+                            android:clipChildren="true"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
 
                 </LinearLayout>
 
                 <Space
-                    android:layout_height="200dp"
-                    android:layout_weight="2"
-                    android:layout_width="wrap_content" />
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp" />
 
             </LinearLayout>
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_weight="2" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/bottom_buttons_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.7"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/log_fr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/log_out"
+                    android:layout_width="54dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/logout"
+                    android:src="@drawable/logout" />
+            </FrameLayout>
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:id="@+id/add_fr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/add_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/accounts" />
+            </FrameLayout>
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:id="@+id/post_fr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/send_post"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/direct" />
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/log_show"
+        android:layout_width="0dp"
+        android:layout_height="110dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RelativeLayout
+            android:id="@+id/log_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bottom_layout_border"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:gravity="bottom"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <FrameLayout
+                <TextView
+                    android:id="@+id/log_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_weight="1">
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="@font/font"
+                    android:gravity="center"
+                    android:text="@string/logout_bottom_bar_title"
+                    android:textSize="20sp" />
 
-                    <ImageButton
-                        android:id="@+id/log_out"
-                        style="@style/Widget.Crossposter.Button"
-                        android:layout_width="54dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/logout_vk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="1"
-                        android:background="@drawable/logout"
-                        android:src="@drawable/logout" />
-                </FrameLayout>
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/vk"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="12sp"
+                        app:strokeColor="@color/colorBlack"
+                        app:strokeWidth="3dp" />
 
-                <Space
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    <Space
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2" />
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_weight="1">
-
-                    <ImageButton
-                        android:id="@+id/dialog_button"
-                        style="@style/Widget.Crossposter.Button"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/log_out_twitter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/accounts" />
-                </FrameLayout>
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/twitter"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="12sp"
+                        app:strokeColor="@color/colorBlack"
+                        app:strokeWidth="3dp" />
 
-                <Space
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    <Space
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2" />
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_weight="1">
-
-                    <ImageButton
-                        android:id="@+id/send_post"
-                        style="@style/Widget.Crossposter.Button"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/log_out_facebook"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
                         android:layout_weight="1"
-                        android:background="@drawable/direct" />
-                </FrameLayout>
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/facebook"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="10sp"
+                        app:strokeColor="@color/colorBlack"
 
+                        app:strokeWidth="3dp" />
+                </LinearLayout>
             </LinearLayout>
 
-
-        </LinearLayout>
+        </RelativeLayout>
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/perform_login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
     </LinearLayout>
-    <include layout="@layout/bottom_sheet"/>
+    <LinearLayout
+        android:id="@+id/add_show"
+        android:layout_width="0dp"
+        android:layout_height="110dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        facebook:layout_constraintBottom_toBottomOf="parent"
+        facebook:layout_constraintEnd_toEndOf="parent"
+        facebook:layout_constraintStart_toStartOf="parent">
+
+        <RelativeLayout
+            android:id="@+id/add_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bottom_layout_border"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/add_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="@font/font"
+                    android:gravity="center"
+                    android:text="@string/add_bottom_bar_title"
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_vk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/vk"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="12sp"
+                        app:strokeColor="@color/colorBlack"
+                        app:strokeWidth="3dp" />
+
+                    <Space
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_twitter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/twitter"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="12sp"
+                        app:strokeColor="@color/colorBlack"
+                        app:strokeWidth="3dp" />
+
+                    <Space
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_facebook"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/facebook"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="10sp"
+                        app:strokeColor="@color/colorBlack"
+
+                        app:strokeWidth="3dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/post_show"
+        android:layout_width="0dp"
+        android:layout_height="110dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        facebook:layout_constraintBottom_toBottomOf="parent"
+        facebook:layout_constraintEnd_toEndOf="parent"
+        facebook:layout_constraintStart_toStartOf="parent">
+
+        <RelativeLayout
+
+            android:id="@+id/post_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bottom_layout_border"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/post_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="@font/font"
+                    android:gravity="center"
+                    android:text="@string/post_bottom_bar_title"
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_weight="2"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/vk_switch_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/urbanist_font"
+                            android:gravity="center"
+                            android:text="@string/vk" />
+
+                        <Switch
+                            android:id="@+id/vk_switch"
+                            style="@style/Widget.Crossposter.Switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/twitter_switch_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/urbanist_font"
+                            android:gravity="center"
+                            android:text="@string/twitter" />
+
+                        <Switch
+                            android:id="@+id/twitter_switch"
+                            style="@style/Widget.Crossposter.Switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_weight="2"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/facebook_switch_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/urbanist_font"
+                            android:gravity="center"
+                            android:text="@string/facebook" />
+
+                        <Switch
+                            android:id="@+id/facebook_switch"
+                            style="@style/Widget.Crossposter.Switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_post"
+                        android:layout_width="100dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="25dp"
+                        android:backgroundTint="@color/colorWhite"
+                        android:fontFamily="@font/urbanist_font"
+                        android:text="@string/post"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="18sp"
+                        app:strokeWidth="3dp"
+                        facebook:strokeColor="@color/colorBlack" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

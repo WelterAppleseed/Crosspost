@@ -2,23 +2,25 @@ package com.example.crossposter2.utils;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 
-import com.example.crossposter2.MainActivity;
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+
 import com.example.crossposter2.R;
 
 public class ClickListeners {
@@ -39,9 +41,6 @@ public class ClickListeners {
     boolean facebook_switch_state, vk_switch_state, telegram_switch_state, unknown_switch_state;
     private boolean _isRecycleSrcBitmap;
 
-    public void scrollImageViewsListener(HorizontalScrollView scrollView) {
-        scrollView.scrollTo(30, 0);
-    }
     public View.OnClickListener getReadyToImageListener(View.OnTouchListener listener) {
         return new View.OnClickListener() {
             @Override
@@ -50,6 +49,7 @@ public class ClickListeners {
             }
         };
     }
+
     public View.OnTouchListener getImageListener(LinearLayout layout) {
         return new View.OnTouchListener() {
             @Override
@@ -96,72 +96,37 @@ public class ClickListeners {
         };
     }
 
-    public View.OnClickListener getPostClickListener(Context context) {
+    public View.OnClickListener testPostLis(LinearLayout[] layouts, LinearLayout selectedLayout, RelativeLayout[] toolbars, RelativeLayout selectedToolbar) {
         return new View.OnClickListener() {
+            int closedToolbarId;
+
             @Override
             public void onClick(View v) {
-                final Dialog switchDialog = new Dialog(context);
-                switchDialog.setContentView(R.layout.switches);
+                for (RelativeLayout toolbar : toolbars) {
+                    if (toolbar.getVisibility() == View.VISIBLE) {
+                        String parent = toolbar.getParent().toString();
+                        closedToolbarId = toolbar.getId();
+                        if (parent.equals(layouts[0].toString())) {
 
-                fS = (Switch) switchDialog.findViewById(R.id.facebook_switch);
-                vS = (Switch) switchDialog.findViewById(R.id.vk_switch);
-                tS = (Switch) switchDialog.findViewById(R.id.telegram_switch);
-                oS = (Switch) switchDialog.findViewById(R.id.unknown_switch);
-
-                //Getting switch states
-                switch_prf = context.getSharedPreferences("test", Context.MODE_PRIVATE);
-                facebook_switch_state = switch_prf.getBoolean("facebook_switch_state", false);
-                vk_switch_state = switch_prf.getBoolean("vk_switch_state", false);
-                telegram_switch_state = switch_prf.getBoolean("telegram_switch_state", false);
-                unknown_switch_state = switch_prf.getBoolean("unknown_switch_state", false);
-                //Setting checked
-                fS.setChecked(facebook_switch_state);
-                tS.setChecked(telegram_switch_state);
-                oS.setChecked(unknown_switch_state);
-                vS.setChecked(vk_switch_state);
-                switchDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        editor = context.getSharedPreferences("test", Context.MODE_PRIVATE).edit();
-                        editor.putBoolean("facebook_switch_state", fS.isChecked());
-                        editor.putBoolean("vk_switch_state", vS.isChecked());
-                        editor.putBoolean("telegram_switch_state", tS.isChecked());
-                        editor.putBoolean("unknown_switch_state", oS.isChecked());
-                        editor.apply();
-                        switchDialog.cancel();
+                            ToolbarsAnimations.startHideAnimation(layouts[0], toolbar);
+                        }
+                        if (parent.equals(layouts[1].toString())) {
+                            ToolbarsAnimations.startHideAnimation(layouts[1], toolbar);
+                        }
+                        if (parent.equals(layouts[2].toString())) {
+                            ToolbarsAnimations.startHideAnimation(layouts[2], toolbar);
+                        }
                     }
-                });
-                post = (Button) switchDialog.findViewById(R.id.post);
-                post.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (vS.isChecked()) {
-                                        System.out.println("VS");
-                                        //vkAction();
-                                    }
-                                    if (tS.isChecked()) {
-                                        System.out.println("TS");
-                                        //tgAction();
-                                    }
-                                    if (fS.isChecked()) {
-                                        System.out.println("FS");
-                                        //fbAction();
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }.start();
-                    }
-                });
-                switchDialog.show();
+                }
+                System.out.println(closedToolbarId + " " + selectedToolbar.getId());
+                if (closedToolbarId != selectedToolbar.getId()) {
+                    ToolbarsAnimations.startShowAnimation(selectedLayout, selectedToolbar);
+                }
+                closedToolbarId = 0;
             }
         };
     }
+
     public void removeImg(View view, float yCord, LinearLayout imgLayout) {
         ViewPropertyAnimator delAnim;
         Animation imageAnim = new Animation() {

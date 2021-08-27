@@ -1,13 +1,15 @@
 <resources>
     <string name="app_name">Crossposter2</string>
-    <string name="tg_dialog_title">
-        <font size="20"><b> Please, enter the channel name</b></font>
-    </string>
-    <string name="tg_dialog_text">
-        <font size="14">Click on the channel headliner and input text after:</font></string>
-    <string name="tg_dialog_example">
-         <p><b>• t.me/{channel_name}</b></p>
-    </string>
+    <string name="logout_bottom_bar_title">LOGOUT</string>
+    <string name="add_bottom_bar_title">CONNECT</string>
+    <string name="post_bottom_bar_title">POST</string>
+    <string name="facebook">Facebook</string>
+    <string name="vk">VK</string>
+    <string name="twitter">Twitter</string>
+    <string name="post">Post</string>
+
+
+
     <string name="auth_def">Connect with</string>
     <string name="vkontakte">VK</string>
     <string name="vk_app_id">7838662</string>

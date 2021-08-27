@@ -61,5 +61,4 @@ dependencies {
     annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.1"
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0'
-
 }
