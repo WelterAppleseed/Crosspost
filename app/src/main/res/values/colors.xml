@@ -3,12 +3,14 @@
     <color name="colorBlack">#000000</color>
     <color name="darkThemeBackground">#000000</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="colorGrey">#6A6A6A</color>
     <color name="titleColor">#A8A8A8</color>
+    <color name="dialogColorText">#4C4C4C</color>
     <color name="disabledColorBack">#C7DDDDDD</color>
     <color name="colorPrimaryDark">#022033</color>
     <color name="colorPrimary">#330567</color>
-    <color name="colorAccent">#3E97D1</color>
-    <color name="colorPrimaryVariant">#65A6D1</color>
+    <color name="color">#3E97D1</color>
+    <color name="colorSwitchTrackChecked">#9FD6FA</color>
     <color name="colorSecondaryAccent">#FFB034</color>
     <color name="colorSecondaryPrimary">#FFBD6A</color>
     <color name="colorSecondaryPrimaryVariant">#FFCF92</color>

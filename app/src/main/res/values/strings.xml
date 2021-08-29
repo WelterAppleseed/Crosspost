@@ -7,8 +7,25 @@
     <string name="vk">VK</string>
     <string name="twitter">Twitter</string>
     <string name="post">Post</string>
-
-
+    <string name="oops">O-oops!</string>
+    <string name="crosspost">Crosspost</string>
+    <string name="information_title">is allows you to make posts on the wall of several messengers at once. A little about the mechanics:</string>
+    <string name="information_exit">- Click on the \"Logout\" button to open a panel and select messengers from which you can exit.</string>
+    <string name="information_add">- Click on the \"Connect\" button to open a panel and select messengers that can be connected.</string>
+    <string name="information_post">- Click on the \"Post\" button to open a panel to select messengers to which you can send your post.</string>
+    <string name="information_img">- Click on the \"Add image\" button to attach photos from the gallery to your post.</string>
+    <string name="information_warn">- Click on the \"Warning\" button to report the problem.</string>
+    <string name="ok">OK</string>
+    <string name="understand">Got it</string>
+    <string name="found_error">Did you find an error?</string>
+    <string name="error_reporting">Please let me know if you find any error in my application. You can inform me about it by email:</string>
+    <string name="email">threedaystomars@yandex.ru</string>
+    <string name="copy_email">click here to copy</string>
+    <string name="be_aware">Be aware</string>
+    <string name="you_are_not_auth">Looks like uou are not logged in. Please, log in using one of the presented messengers.</string>
+    <string name="doesnt_allow">Official Facebook methods doesn\'t\ allow to send more than 6 photos at once. If you\'l\l choose more, Crossposter will forced to use</string>
+    <string name="another"><u>another method of posting</u></string>
+    <string name="stop_show">Don\'t\ show this message again</string>
 
     <string name="auth_def">Connect with</string>
     <string name="vkontakte">VK</string>
@@ -21,7 +38,6 @@
     <string name="tg_dialog_msg">Add Telegram</string>
     <string name="facebook_app_id">591026155217324</string>
     <string name="fb_login_protocol_scheme">fb591026155217324</string>
-    <string name="you_are_not_auth"><font size="14"><b>You are not authorizated. Please, authorizise with one of your accounts.</b></font></string>
     <integer name="com_vk_sdk_AppId">7838662</integer>
 
 </resources>

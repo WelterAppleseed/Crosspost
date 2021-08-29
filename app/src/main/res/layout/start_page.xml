@@ -3,62 +3,153 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/edit"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical"
-        android:gravity="center">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textView"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/you_are_not_auth"
-            android:gravity="center"/>
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:orientation="vertical">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="25dp" />
 
-        <FrameLayout
-            android:id="@+id/FrameLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="20dp"
+                app:srcCompat="@drawable/flies" />
 
-            <com.facebook.login.widget.LoginButton
-                android:id="@+id/fb_login_button"
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                app:srcCompat="@drawable/frog" />
+
+            <TextView
+                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                />
+                android:layout_gravity="center"
+                android:layout_marginTop="25dp"
+                android:layout_marginBottom="2dp"
+                android:fontFamily="@font/font"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.5"
+                android:text="@string/oops"
+                android:textColor="@color/colorBlack"
+                android:textSize="40sp" />
 
-            <Button
-                android:id="@+id/fb"
-                android:layout_width="fill_parent"
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#416BC1"
-                android:onClick="onClick"
-                android:text="FaceBook"
-                android:textColor="#ffffff"
-                android:textStyle="bold" />
-        </FrameLayout>
+                android:layout_gravity="bottom"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:fontFamily="@font/font"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.5"
+                android:text="@string/you_are_not_auth"
+                android:textSize="18sp" />
+        </LinearLayout>
 
-        <Space
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            android:layout_height="match_parent"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_weight="3"
+            android:gravity="top"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/startPageVkButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#678FDF"
-            android:textColor="#ffffff"
-            android:text="@string/vkontakte"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/startPageVkButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorWhite"
+                android:text="@string/vk"
+                android:textColor="@color/colorBlack"
+                android:textSize="12sp"
+                android:fontFamily="@font/urbanist_font"
+                app:strokeWidth="3dp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <FrameLayout
+                android:id="@+id/FrameLayout1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.facebook.login.widget.LoginButton
+                    android:id="@+id/fb_login_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/fb"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/colorWhite"
+                    android:text="@string/facebook"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/urbanist_font"
+                    app:strokeWidth="3dp" />
+
+            </FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorWhite"
+                android:text="@string/twitter"
+                android:textColor="@color/colorBlack"
+                android:textSize="12sp"
+                android:fontFamily="@font/urbanist_font"
+                android:alpha="0.3"
+                android:clickable="false"
+                android:enabled="false"
+                app:strokeWidth="3dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/warning_button"
+        android:layout_width="60dp"
+        android:layout_height="50dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/warning"
+        android:scaleX="0.85"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,7 @@
         <item name="editTextStyle">@style/Widget.Crossposter.EditText</item>
         <item name="alertDialogStyle">@style/Base.Crossposter.AlertDialog</item>
         <item name="switchStyle">@style/Widget.Crossposter.Switch</item>
+        <item name="colorAccent">@color/colorBlack</item>
         <item name="cornerFamily">cut</item>
         -<item name="cornerSize">8dp</item>
     </style>
@@ -21,6 +22,12 @@
         <item name="boxStrokeColor">#FFF</item>
         <item name="boxStrokeWidthFocused">0dp</item>
         <item name="boxBackgroundColor">#FFF</item>
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:textColorHint">#8AFFFFFF</item>
+        <item name="android:textSelectHandle">@color/colorBlack</item>
+        <item name="android:textColorHighlight">@color/colorGrey</item>
+        <item name="android:textCursorDrawable">@color/colorBlack</item>// For pointer normal state and copy text state
+
     </style>
     <style name="Base.Crossposter.AlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:textColorPrimary">@color/darkThemeBackground</item>
@@ -33,7 +40,8 @@
     <style name="Widget.Crossposter.Switch" parent="Theme.AppCompat.Light">
         <!-- colorPrimary is used for the default action bar background -->
         <item name="colorPrimary">@color/colorBlack</item>
-
+        <item name="android:thumb">@drawable/switch_thumb</item>
+        <item name="android:track">@drawable/switch_track</item>
         <!-- colorPrimaryDark is used for the status bar -->
         <item name="colorPrimaryDark">@color/colorBlack</item>
 

@@ -13,12 +13,9 @@ import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
@@ -29,28 +26,29 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.provider.MediaStore;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.example.crossposter2.account.Account;
 import com.example.crossposter2.account.Api;
+import com.example.crossposter2.fb.FacebookActivity;
 import com.example.crossposter2.fb.FbConstant;
 import com.example.crossposter2.tg.IsAppAvailable;
 import com.example.crossposter2.utils.ClickListeners;
-import com.example.crossposter2.utils.CrossposterDialogFragment;
 import com.example.crossposter2.utils.ImageManager;
 import com.example.crossposter2.utils.ImageUI;
 import com.example.crossposter2.utils.RealPathUtil;
@@ -66,6 +64,12 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareContent;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.ShareMedia;
+import com.facebook.share.model.ShareMediaContent;
+import com.facebook.share.model.SharePhoto;
 import com.facebook.share.widget.ShareDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vk.api.sdk.VK;
@@ -86,6 +90,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     //test
@@ -99,40 +106,29 @@ public class MainActivity extends AppCompatActivity {
 
     private final int BOX_WIDTH = 185;
     private final int BOX_HEIGHT = 185;
-    private final int SHOW_MESSENGERS_DIALOG = 2;
     private final int DIALOG_INPUT = 3;
-    private final int LOGOUT_FORM = 4;
-    private int imgCount = 5;
-    private float xCoOrdinate, yCoOrdinate;
     private ArrayList<String> imagesEncodedList;
-    ImageView addImageIcon;
-    private HorizontalScrollView scrollView;
-    ImageView[] imgGroup;
+    private ImageView addImageIcon;
     private final String TAG = "Crossposter";
-    private final int FACEBOOK_BUTTON = 4;
     final String SAVED_TG_CHANNEL = "saved_tg_channel";
     private FirebaseAuth mAuth;
-    private String imageEncoded;
-    SharedPreferences token_prf, switch_prf;
-    SharedPreferences.Editor editor;
-    String fb_token, vk_token;
-    private long fb_user_id, vk_user_id;
-    EditText input;
-    private ArrayList<Bitmap> bitmaps;
+    private SharedPreferences token_prf, switch_prf;
+    private SharedPreferences.Editor editor;
+    private String fb_token;
+    private long fb_user_id;
     boolean facebook_switch_state, vk_switch_state, twitter_switch_state;
     private CallbackManager callbackManager;
     private LoginButton connectFbPerformedButton;
-    ImageButton logoutSectionButton, connectSectionButton, postSectionButton;
-    ArrayList<Uri> uris = new ArrayList<>();
-    FrameLayout logFr, addFr, postFr;
+    private ImageButton logoutSectionButton, connectSectionButton, postSectionButton;
+    private static Map<Uri, String> uris = new HashMap<>();
     public LinearLayout imgLayout, bottomButtonsLayout;
-    ShareDialog shareDialog;
-    Switch fS, tS, vS, oS;
-    ImageButton postButton;
-    FragmentManager manager;
-    Button connectVk, connectTw, connectFb, logoutVk, logoutTw, logoutFb, sendPostB;
-    Button addImageButton, post;
-    ImageButton dialogButton;
+    private ShareDialog shareDialog;
+    private Switch fS, tS, vS, oS;
+    private FragmentManager manager;
+    private Button connectVk, connectTw, connectFb, logoutVk, logoutTw, logoutFb, post;
+    private ImageButton infoButton, reportButton;
+    private TextView copyText;
+    private FrameLayout performEditText;
     View.OnClickListener longClickListener;
     View.OnTouchListener imgListener;
     VKTokenExpiredHandler tokenHandler = new VKTokenExpiredHandler() {
@@ -142,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     VK vk;
-    Bitmap[] images = new Bitmap[5];
+    private static ArrayList<String> images = new ArrayList<String>();
     EditText messageEditText;
     Account fbAccount = new Account();
     ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
@@ -160,10 +156,8 @@ public class MainActivity extends AppCompatActivity {
                         params.setMargins(Utils.dpToPx(10), Utils.dpToPx(6), 0, 0);
                         ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
                         imgListener = new ClickListeners().getImageListener(imgLayout);
-                        longClickListener = new ClickListeners().getReadyToImageListener(imgListener);
                         try {
                             imagesEncodedList = new ArrayList<String>();
-                            uris.clear();
                             if (data.getData() != null) {
                                 Uri mImageUri = data.getData();
                                 String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), mImageUri);
@@ -174,17 +168,17 @@ public class MainActivity extends AppCompatActivity {
                                         .setIsScale(true)
                                         .setIsResize(true)
                                         .getFromBitmap(bm);
-                                uris.add(mImageUri);
                                 ImageView imageView = new ImageView(getApplicationContext());
                                 imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                                 imageView.setVisibility(View.VISIBLE);
                                 imageView.setImageBitmap(bem);
-                                imageView.setOnClickListener(longClickListener);
                                 imageView.setLayoutParams(params);
+                                imageView.setOnTouchListener(imgListener);
                                 imageView.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.rounded_corners));
                                 imageView.setForeground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.images_border));
                                 imageView.setClipToOutline(true);
                                 imgLayout.addView(imageView);
+                                uris.put(mImageUri, imageView.getDrawable().toString());
                             } else {
                                 if (data.getClipData() != null) {
                                     ClipData mClipData = data.getClipData();
@@ -199,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
                                                 .setIsScale(true)
                                                 .setIsResize(true)
                                                 .getFromBitmap(bm);
-                                        uris.add(uri);
                                         ImageView imageView = new ImageView(getApplicationContext());
                                         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                                         imageView.setVisibility(View.VISIBLE);
@@ -210,7 +203,9 @@ public class MainActivity extends AppCompatActivity {
                                         imageView.setForeground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.images_border));
                                         imageView.setClipToOutline(true);
                                         imgLayout.addView(imageView);
+                                        uris.put(uri, imageView.getDrawable().toString());
                                     }
+                                    System.out.println(images.size());
                                     imgLayout.setVisibility(View.VISIBLE);
                                     Log.v("LOG_TAG", "Selected Images " + uris.size());
                                 }
@@ -234,16 +229,19 @@ public class MainActivity extends AppCompatActivity {
         manager = getSupportFragmentManager();
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
-        callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_main);
         //FB
-        shareDialog = new ShareDialog(this);
+        facebookShowDialogInit();
         fbRestore();
         //VK
         VK.addTokenExpiredHandler(tokenHandler);
         //
         setToolbarY();
         checkAuth();
+    }
+
+    public static Map<Uri, String> getUris() {
+        return uris;
     }
 
     public int getCameraPhotoOrientation(Context context, Uri imageUri,
@@ -281,10 +279,32 @@ public class MainActivity extends AppCompatActivity {
         if (!VK.isLoggedIn() && fbApi == null) {
             Intent intent = new Intent(MainActivity.this, StartPage.class);
             startActivity(intent);
+            finish();
         } else {
             createUI();
         }
     }
+    public void facebookShowDialogInit() {
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                Log.i("success", result.toString());
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+    }
+
     public void setToolbarY() {
         logToolbarShow = (LinearLayout) findViewById(R.id.log_show);
         addToolbarShow = (LinearLayout) findViewById(R.id.add_show);
@@ -311,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
             fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
         }
     }
+
     public void createToolbarUI() {
         logToolbar = (RelativeLayout) findViewById(R.id.log_toolbar);
         addToolbar = (RelativeLayout) findViewById(R.id.add_toolbar);
@@ -330,9 +351,12 @@ public class MainActivity extends AppCompatActivity {
         vS = (Switch) findViewById(R.id.vk_switch);
         tS = (Switch) findViewById(R.id.twitter_switch);
 
+        fS.setOnCheckedChangeListener(new ClickListeners().onFacebookSwitchClickListener(MainActivity.this));
+
         logoutVk = (Button) findViewById(R.id.logout_vk);
         logoutTw = (Button) findViewById(R.id.log_out_twitter);
         logoutFb = (Button) findViewById(R.id.log_out_facebook);
+
 
         connectVk = (Button) findViewById(R.id.add_vk);
         connectTw = (Button) findViewById(R.id.add_twitter);
@@ -346,50 +370,46 @@ public class MainActivity extends AppCompatActivity {
                         .getToken();
                 Log.i("accessToken", accessToken);
 
-                //        GraphRequest request = GraphRequest.newMeRequest(
-                //                loginResult.getAccessToken(),
-                //                new GraphRequest.GraphJSONObjectCallback() {@Override
-                //                public void onCompleted(JSONObject object,
-                //                                         GraphResponse response) {
-                //
-                //                    Log.i("LoginActivity",
-                //                              response.toString());
-                //                     try {
-                //                          info[0] = object.getString("id");
-                //                         try {
-                //                             URL profile_pic = new URL(
-                //                                     "http://graph.facebook.com/" + info[0] + "/picture?type=large");
-                //                             Log.i("profile_pic",
-                //                                     profile_pic + "");
-                //
-                //                          } catch (MalformedURLException e) {
-                //                              e.printStackTrace();
-                //                          }
-                //                          info[1] = object.getString("name");
-                //                          info[2]= object.getString("email");
-                //                          info[3] = object.getString("gender");
-                //                          info[4] = object.getString("birthday");
-                //                      } catch (JSONException e) {
-                //                           e.printStackTrace();
-                //                        }
-                //                    }
-                //                     });
-                //            Bundle parameters = new Bundle();
-                //            parameters.putString("fields",
-                //                    "id,name,email,gender, birthday");
-                //           request.setParameters(parameters);
-                //          request.executeAsync();
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(JSONObject object,
+                                                    GraphResponse response) {
+
+                                Log.i("LoginActivity",
+                                        response.toString());
+                                try {
+                                    info[0] = object.getString("id");
+                                    try {
+                                        URL profile_pic = new URL(
+                                                "http://graph.facebook.com/" + info[0] + "/picture?type=large");
+                                        Log.i("profile_pic",
+                                                profile_pic + "");
+
+                                    } catch (MalformedURLException e) {
+                                        e.printStackTrace();
+                                    }
+                                    info[1] = object.getString("name");
+                                    info[2] = object.getString("email");
+                                    info[3] = object.getString("gender");
+                                    info[4] = object.getString("birthday");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                Bundle parameters = new Bundle();
+                parameters.putString("fields",
+                        "id,name,email,gender, birthday");
+                request.setParameters(parameters);
+                request.executeAsync();
                 fbAccount.access_token_fb = accessToken;
-                //fbAccount.user_id_fb = Long.parseLong(info[0]);
+                fbAccount.user_id_fb = Long.parseLong(info[0]);
                 fbAccount.saveFb(MainActivity.this);
                 fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
 
-                fS.setEnabled(true);
-                connectFb.setEnabled(false);
-                connectFb.setClickable(false);
-                logoutFb.setEnabled(true);
-                logoutFb.setClickable(true);
-                connectFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+                ClickListeners.onLogin(MainActivity.this, fS, connectFb, logoutFb);
             }
 
             @Override
@@ -404,37 +424,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (fbApi == null) {
-            fS.setClickable(false);
-            fS.setFocusable(false);
-            fS.setEnabled(false);
-            logoutFb.setEnabled(false);
-            logoutFb.setClickable(false);
-            logoutFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+            Utils.setDisable(MainActivity.this, fS, logoutFb);
         } else {
-            fS.setChecked(facebook_switch_state);
-            fS.setEnabled(true);
-            connectFb.setEnabled(false);
-            connectFb.setClickable(false);
-            connectFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+            Utils.setEnable(MainActivity.this, fS, connectFb, facebook_switch_state);
         }
         if (!VK.isLoggedIn()) {
-            vS.setClickable(false);
-            vS.setFocusable(false);
-            vS.setEnabled(false);
-            logoutVk.setEnabled(false);
-            logoutVk.setClickable(false);
-            logoutVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+            Utils.setDisable(MainActivity.this, vS, logoutVk);
         } else {
-            vS.setChecked(vk_switch_state);
-            vS.setEnabled(true);
-            connectVk.setEnabled(false);
-            connectVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+            Utils.setEnable(MainActivity.this, vS, connectVk, vk_switch_state);
         }
-        tS.setClickable(true);
-        tS.setFocusable(true);
-        tS.setBackgroundColor(getResources().getColor(R.color.colorBlack));
-        logoutTw.setEnabled(false);
-        logoutTw.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        Utils.setDisable(MainActivity.this, tS, logoutTw);
         connectTw.setEnabled(false);
         connectTw.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
 
@@ -442,14 +441,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 VK.logout();
-                vS.setClickable(false);
-                vS.setFocusable(false);
-                vS.setEnabled(false);
-                logoutVk.setEnabled(false);
-                logoutVk.setClickable(false);
-                logoutVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
-                connectVk.setEnabled(true);
-                connectVk.setClickable(true);
+                ClickListeners.onLogout(MainActivity.this, vS, logoutVk, connectVk);
                 checkAuth();
             }
         });
@@ -461,14 +453,7 @@ public class MainActivity extends AppCompatActivity {
                 fbAccount.user_id_fb = 0;
                 fbAccount.saveFb(MainActivity.this);
                 LoginManager.getInstance().logOut();
-                fS.setClickable(false);
-                fS.setFocusable(false);
-                fS.setEnabled(false);
-                logoutFb.setEnabled(false);
-                logoutFb.setClickable(false);
-                connectFb.setEnabled(true);
-                connectFb.setClickable(true);
-                logoutFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+                ClickListeners.onLogout(MainActivity.this, fS, logoutFb, connectFb);
                 checkAuth();
             }
         });
@@ -512,6 +497,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        infoButton = (ImageButton) findViewById(R.id.question_button);
+        reportButton = (ImageButton) findViewById(R.id.warning_button);
+
+        infoButton.setOnClickListener(new ClickListeners().onInfoClickListener(MainActivity.this));
+        reportButton.setOnClickListener(new ClickListeners().onReportClickListener(MainActivity.this));
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -538,7 +528,17 @@ public class MainActivity extends AppCompatActivity {
                 addImageLauncher.launch(intent);
             }
         });
+
         messageEditText = (EditText) findViewById(R.id.edit_msg);
+        messageEditText.requestFocus();
+        performEditText = (FrameLayout) findViewById(R.id.perform_edit_text);
+        performEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(messageEditText, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
         bottomButtonsLayout = (LinearLayout) findViewById(R.id.bottom_buttons_layout);
 
     }
@@ -548,7 +548,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void vkAction() {
-        VK.execute(new VKWallPostCommand(messageEditText.getText().toString(), uris, VK.getUserId(), false, false), new VKApiCallback<Integer>() {
+        Collection<Uri> values = uris.keySet();
+        ArrayList<Uri> uriList = new ArrayList<>(values);
+
+        VK.execute(new VKWallPostCommand(messageEditText.getText().toString(), uriList, VK.getUserId(), false, false), new VKApiCallback<Integer>() {
             @Override
             public void success(Integer integer) {
                 runOnUiThread(successRunnable);
@@ -561,9 +564,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void onTgClick() {
-        showDialog(DIALOG_INPUT);
-    }
 
     public void tgAction() {
         final String appName = "org.telegram.messenger";
@@ -588,15 +588,55 @@ public class MainActivity extends AppCompatActivity {
 
     public void onFbClick() {
         connectFbPerformedButton.performClick();
+        connectFbPerformedButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                fS.setEnabled(true);
+                fS.setClickable(true);
+                connectFb.setClickable(false);
+                connectFb.setEnabled(false);
+                logoutFb.setClickable(true);
+                logoutFb.setEnabled(true);
+                connectFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
     }
 
     public void fbAction() {
-        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
-        intent.setType("image/jpeg");
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        startActivity(intent);
-        runOnUiThread(clipboardRunnable);
+        Collection<Uri> values = uris.keySet();
+        ArrayList<Uri> uriList = new ArrayList<>(values);
+        if (uriList.size() > 6) {
+            Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+            intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
+            intent.setType("image/jpeg");
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
+            startActivity(intent);
+        } else {
+            if (Utils.isAppInstalled(MainActivity.this, "com.facebook.katana")) {
+                if (ShareDialog.canShow(ShareMediaContent.class) | ShareDialog.canShow(ShareContent.class)) {
+                    ShareContent content = setShareContent(uriList);
+                    shareDialog.show(content);
+                    runOnUiThread(clipboardRunnable);
+                }
+            } else {
+
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.facebook.katana")));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + "com.facebook.katana")));
+                }
+            }
+        }
     }
 
     Runnable successRunnable = new Runnable() {
@@ -652,9 +692,25 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    public ShareContent setShareContent(ArrayList<Uri> uris) {
+        Log.i("startSettingUris", uris.toString());
+        ArrayList<ShareMedia> photos = new ArrayList<>();
+        ShareContent content;
+        for (int i = 0; i < uris.size(); i++) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uris.get(i));
+                SharePhoto photo = new SharePhoto.Builder()
+                        .setBitmap(bitmap)
+                        .build();
+                photos.add(photo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        content = new ShareMediaContent.Builder()
+                .addMedia(photos)
+                .build();
+        return content;
     }
 
     public void requestRead() {

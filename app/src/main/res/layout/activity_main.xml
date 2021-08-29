@@ -76,6 +76,7 @@
                 android:orientation="vertical">
 
                 <FrameLayout
+                    android:id="@+id/perform_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1">
@@ -83,13 +84,16 @@
                     <EditText
                         android:id="@+id/edit_msg"
                         style="@style/Widget.Crossposter.EditText"
+                        android:textColor="@color/colorBlack"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="15dp"
                         android:layout_marginTop="15dp"
                         android:layout_marginEnd="15dp"
                         android:layout_marginBottom="10dp"
-                        android:background="@color/colorInvisible" />
+                        android:fontFamily="@font/urbanist_font"
+                        android:background="@color/colorInvisible"
+                        android:autofillHints="Type here..." />
                 </FrameLayout>
 
                 <LinearLayout
@@ -442,7 +446,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/bottom_layout_border"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -481,6 +485,10 @@
                             android:gravity="center"
                             android:text="@string/vk" />
 
+                        <Space
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp" />
+
                         <Switch
                             android:id="@+id/vk_switch"
                             style="@style/Widget.Crossposter.Switch"
@@ -505,6 +513,10 @@
                             android:gravity="center"
                             android:text="@string/twitter" />
 
+                        <Space
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp" />
+
                         <Switch
                             android:id="@+id/twitter_switch"
                             style="@style/Widget.Crossposter.Switch"
@@ -527,6 +539,10 @@
                             android:fontFamily="@font/urbanist_font"
                             android:gravity="center"
                             android:text="@string/facebook" />
+
+                        <Space
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp" />
 
                         <Switch
                             android:id="@+id/facebook_switch"
