@@ -98,7 +98,7 @@
                     android:layout_height="20dp"
                     android:layout_marginStart="7dp"
                     android:layout_marginTop="2dp"
-                    app:srcCompat="@drawable/accounts" />
+                    app:srcCompat="@drawable/add_user" />
 
                 <TextView
                     android:id="@+id/info_add_text"

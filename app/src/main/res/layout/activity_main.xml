@@ -178,8 +178,7 @@
                     android:layout_height="60dp"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:background="@drawable/logout"
-                    android:src="@drawable/logout" />
+                    android:background="@drawable/logout" />
             </FrameLayout>
 
             <Space
@@ -200,7 +199,7 @@
                     android:layout_height="60dp"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:background="@drawable/accounts" />
+                    android:background="@drawable/add_user" />
             </FrameLayout>
 
             <Space
