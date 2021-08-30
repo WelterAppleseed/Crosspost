@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void facebookShowDialogInit() {
+    private void facebookShowDialogInit() {
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void setToolbarY() {
+    private void setToolbarY() {
         logToolbarShow = (LinearLayout) findViewById(R.id.log_show);
         addToolbarShow = (LinearLayout) findViewById(R.id.add_show);
         postToolbarShow = (LinearLayout) findViewById(R.id.post_show);
@@ -317,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void createToolbarUI() {
+    private void createToolbarUI() {
         logToolbar = (RelativeLayout) findViewById(R.id.log_toolbar);
         addToolbar = (RelativeLayout) findViewById(R.id.add_toolbar);
         postToolbar = (RelativeLayout) findViewById(R.id.post_toolbar);
@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 VK.logout();
-                ClickListeners.onLogout(MainActivity.this, vS, logoutVk, connectVk);
+                Utils.onLogout(MainActivity.this, vS, logoutVk, connectVk);
                 checkAuth();
             }
         });
@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
                 fbAccount.user_id_fb = 0;
                 fbAccount.saveFb(MainActivity.this);
                 LoginManager.getInstance().logOut();
-                ClickListeners.onLogout(MainActivity.this, fS, logoutFb, connectFb);
+                Utils.onLogout(MainActivity.this, fS, logoutFb, connectFb);
                 checkAuth();
             }
         });
@@ -514,15 +514,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void createUI() {
+    private void createUI() {
         createToolbarUI();
         logoutSectionButton = (ImageButton) findViewById(R.id.log_out);
         connectSectionButton = (ImageButton) findViewById(R.id.add_button);
         postSectionButton = (ImageButton) findViewById(R.id.send_post);
 
-        logoutSectionButton.setOnClickListener(new ClickListeners().testPostLis(container, logToolbarShow, content, logToolbar));
-        connectSectionButton.setOnClickListener(new ClickListeners().testPostLis(container, addToolbarShow, content, addToolbar));
-        postSectionButton.setOnClickListener(new ClickListeners().testPostLis(container, postToolbarShow, content, postToolbar));
+        logoutSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, logToolbarShow, content, logToolbar));
+        connectSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, addToolbarShow, content, addToolbar));
+        postSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, postToolbarShow, content, postToolbar));
 
         imgLayout = (LinearLayout) findViewById(R.id.img_layout);
         addImageIcon = (ImageView) findViewById(R.id.add);
@@ -552,11 +552,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void onVkClick() {
+    private void onVkClick() {
         VK.login(this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
     }
 
-    public void vkAction() {
+    private void vkAction() {
         Collection<Uri> values = uris.keySet();
         ArrayList<Uri> uriList = new ArrayList<>(values);
 
@@ -574,7 +574,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void tgAction() {
+    private void tgAction() {
        /* if (!tgChannelName.equals(defChannelName)) {
             try {
                 Collection<Uri> values = uris.keySet();
@@ -593,11 +593,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void onFbClick() {
+    private void onFbClick() {
         connectFbPerformedButton.performClick();
     }
 
-    public void fbAction() {
+    private void fbAction() {
         Collection<Uri> values = uris.keySet();
         ArrayList<Uri> uriList = new ArrayList<>(values);
         if (uriList.size() > 6) {
@@ -646,7 +646,7 @@ public class MainActivity extends AppCompatActivity {
         VKAuthCallback callback = new VKAuthCallback() {
             @Override
             public void onLogin(@NotNull VKAccessToken vkAccessToken) {
-                ClickListeners.onLogin(MainActivity.this, vS, connectVk, logoutVk);
+                Utils.onLogin(MainActivity.this, vS, connectVk, logoutVk);
             }
 
             @Override
@@ -671,7 +671,7 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    public ShareContent setShareContent(ArrayList<Uri> uris) {
+   private ShareContent setShareContent(ArrayList<Uri> uris) {
         Log.i("startSettingUris", uris.toString());
         ArrayList<ShareMedia> photos = new ArrayList<>();
         ShareContent content;
@@ -692,7 +692,7 @@ public class MainActivity extends AppCompatActivity {
         return content;
     }
 
-    public void requestRead() {
+    private void requestRead() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {

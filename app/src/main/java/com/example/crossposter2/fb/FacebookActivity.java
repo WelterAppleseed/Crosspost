@@ -36,9 +36,6 @@ public class FacebookActivity extends FragmentActivity {
     CallbackManager callbackManager;
     ShareDialog shareDialog;
     ArrayList<Uri> uris;
-    LoginManager manager;
-    Context context;
-    static Activity activity;
     public FacebookActivity(ArrayList<Uri> uris) {
         this.uris = uris;
     }

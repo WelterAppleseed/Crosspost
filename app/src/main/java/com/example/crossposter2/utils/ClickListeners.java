@@ -39,24 +39,13 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class ClickListeners {
-    Switch fS, tS, vS, oS;
-    public static final int y = Utils.dpToPx(6);
-    private static boolean dontShow;
-    private SharedPreferences switchPrf, tgPrf;
+    private static final int y = Utils.dpToPx(6);
+    private SharedPreferences tgPrf;
     private final double dif_const = 0.00588235294;
     private float yCoOrdinate;
     private SharedPreferences.Editor editor;
-    private ViewPropertyAnimator viewPropertyAnimator, secViewPropertyAnimator;
-    SharedPreferences switch_prf;
-    private ResizeMode _resizeMode;
-    LinearLayout parent;
-    private ScaleMode _scaleMode;
-    private int _boxWidth = 250;
-    Button post;
-    private int _boxHeight = 250;
-    boolean facebook_switch_state, vk_switch_state, telegram_switch_state, unknown_switch_state;
-    private boolean _isRecycleSrcBitmap;
-
+    private ViewPropertyAnimator viewPropertyAnimator;
+    private SharedPreferences switch_prf;
 
     public View.OnTouchListener getImageListener(LinearLayout layout) {
         return new View.OnTouchListener() {
@@ -103,7 +92,7 @@ public class ClickListeners {
         };
     }
 
-    public View.OnClickListener testPostLis(LinearLayout[] layouts, LinearLayout selectedLayout, RelativeLayout[] toolbars, RelativeLayout selectedToolbar) {
+    public View.OnClickListener onBottomLayoutCallListener(LinearLayout[] layouts, LinearLayout selectedLayout, RelativeLayout[] toolbars, RelativeLayout selectedToolbar) {
         return new View.OnClickListener() {
             int closedToolbarId;
 
@@ -133,7 +122,7 @@ public class ClickListeners {
         };
     }
 
-    public void removeImg(View view, float yCord, LinearLayout imgLayout) {
+    private void removeImg(View view, float yCord, LinearLayout imgLayout) {
         Map<Uri, String> images = new MainActivity().getUris();
         ViewPropertyAnimator delAnim;
         Animation imageAnim = new Animation() {
@@ -229,7 +218,7 @@ public class ClickListeners {
                             editor = context.getSharedPreferences("channel", Context.MODE_PRIVATE).edit();
                             editor.putString("channel_name", channelNameInsert.getText().toString());
                             editor.apply();
-                            onLogin(context, swtch, logoutBt, connectBt);
+                            Utils.onLogin(context, swtch, logoutBt, connectBt);
                             dialog.dismiss();
                         }
                     }
@@ -294,34 +283,6 @@ public class ClickListeners {
                 }
             }
         };
-    }
-
-    public static void onLogout(Context context, Switch swtch, Button logoutButton, Button
-            connectButton) {
-        swtch.setClickable(false);
-        swtch.setFocusable(false);
-        swtch.setEnabled(false);
-        swtch.setAlpha((float) 0.3);
-        logoutButton.setEnabled(false);
-        logoutButton.setClickable(false);
-        logoutButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
-        connectButton.setEnabled(true);
-        connectButton.setClickable(true);
-        connectButton.setBackgroundColor(context.getResources().getColor(R.color.colorInvisible));
-    }
-
-    public static void onLogin(Context context, Switch swtch, Button connectButton, Button
-            logoutButton) {
-        swtch.setEnabled(true);
-        swtch.setClickable(true);
-        swtch.setFocusable(true);
-        swtch.setAlpha(1);
-        connectButton.setEnabled(false);
-        connectButton.setClickable(false);
-        connectButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
-        logoutButton.setEnabled(true);
-        logoutButton.setClickable(true);
-        logoutButton.setBackgroundColor(context.getResources().getColor(R.color.colorInvisible));
     }
 }
 

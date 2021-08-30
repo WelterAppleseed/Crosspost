@@ -327,11 +327,3 @@ public final class ImageManager {
         }
     }
     }
-    enum ScaleMode {
-        EQUAL_OR_GREATER,
-        EQUAL_OR_LOWER
-    }
-    enum ResizeMode {
-        EQUAL_OR_GREATER,
-        EQUAL_OR_LOWER
-    }

@@ -35,14 +35,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StartPage extends AppCompatActivity {
-    private Button fb_button, vk_button, inst_button;
     private static String id, name, email, gender, birthday, page_access_token, page_id;
-    private ImageButton reportButton;
     private CallbackManager callbackManager;
-    private static AccessToken access;
-    private LoginButton hidden_button, hidden_button_inst;
-    public static String redirect_url = "https://oauth.vk.com/blank.html";
-    private static String API_VERSION = "5.5";
+    //private static AccessToken access;
+    private LoginButton hidden_button;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,11 +49,11 @@ public class StartPage extends AppCompatActivity {
         fbContentCreate();
         vkContentCreate();
 
-        reportButton = (ImageButton) findViewById(R.id.warning_button);
+        ImageButton reportButton = (ImageButton) findViewById(R.id.warning_button);
         reportButton.setOnClickListener(new ClickListeners().onReportClickListener(StartPage.this));
     }
     private void fbContentCreate() {
-        fb_button = (Button) findViewById(R.id.fb);
+        Button fb_button = (Button) findViewById(R.id.fb);
         fb_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +73,7 @@ public class StartPage extends AppCompatActivity {
                         String accessToken = loginResult.getAccessToken()
                                 .getToken();
                         Log.i("accessToken", accessToken);
-                        access = loginResult.getAccessToken();
+                        //access = loginResult.getAccessToken();
 
                         GraphRequest request = GraphRequest.newMeRequest(
                                 loginResult.getAccessToken(),
@@ -118,15 +114,6 @@ public class StartPage extends AppCompatActivity {
                                                 }
                                             }
                                     ).executeAsync();*/
-                                            try {
-                                                URL profile_pic = new URL(
-                                                        "http://graph.facebook.com/" + id + "/picture?type=large");
-                                                Log.i("profile_pic",
-                                                        profile_pic + "");
-
-                                            } catch (MalformedURLException e) {
-                                                e.printStackTrace();
-                                            }
                                             name = object.getString("name");
                                             email = object.getString("email");
                                             gender = object.getString("gender");
@@ -138,7 +125,7 @@ public class StartPage extends AppCompatActivity {
                                 });
                         Bundle parameters = new Bundle();
                         parameters.putString("fields",
-                                "id,name,email");
+                                "id,name,email,gender,birthday");
                         request.setParameters(parameters);
                         request.executeAsync();
 
@@ -165,7 +152,7 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void vkContentCreate() {
-        vk_button = (Button) findViewById(R.id.startPageVkButton);
+        Button vk_button = (Button) findViewById(R.id.startPageVkButton);
         vk_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -13,14 +13,6 @@ public class VKSaveInfo {
         return this.id;
     }
 
-    public final int getAlbumId() {
-        return this.albumId;
-    }
-
-    public final int getOwnerId() {
-        return this.ownerId;
-    }
-
     public VKSaveInfo(int id, int albumId, int ownerId) {
         this.id = id;
         this.albumId = albumId;

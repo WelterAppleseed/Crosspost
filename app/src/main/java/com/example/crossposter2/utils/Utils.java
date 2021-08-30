@@ -99,4 +99,32 @@ public class Utils {
             return false;
         }
     }
+
+    public static void onLogout(Context context, Switch swtch, Button logoutButton, Button
+            connectButton) {
+        swtch.setClickable(false);
+        swtch.setFocusable(false);
+        swtch.setEnabled(false);
+        swtch.setAlpha((float) 0.3);
+        logoutButton.setEnabled(false);
+        logoutButton.setClickable(false);
+        logoutButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
+        connectButton.setEnabled(true);
+        connectButton.setClickable(true);
+        connectButton.setBackgroundColor(context.getResources().getColor(R.color.colorInvisible));
+    }
+
+    public static void onLogin(Context context, Switch swtch, Button connectButton, Button
+            logoutButton) {
+        swtch.setEnabled(true);
+        swtch.setClickable(true);
+        swtch.setFocusable(true);
+        swtch.setAlpha(1);
+        connectButton.setEnabled(false);
+        connectButton.setClickable(false);
+        connectButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
+        logoutButton.setEnabled(true);
+        logoutButton.setClickable(true);
+        logoutButton.setBackgroundColor(context.getResources().getColor(R.color.colorInvisible));
+    }
 }

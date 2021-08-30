@@ -117,7 +117,7 @@ public class ImageUI extends Activity{
         return bm;
     }
 
-    public static void recycleBitmap(Bitmap bitmap) {
+    private static void recycleBitmap(Bitmap bitmap) {
         if (bitmap == null || bitmap.isRecycled()) return;
         bitmap.recycle();
         System.gc();

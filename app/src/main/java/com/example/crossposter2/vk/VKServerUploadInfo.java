@@ -9,14 +9,6 @@ public class VKServerUploadInfo {
         return this.uploadUrl;
     }
 
-    public final int getAlbumId() {
-        return this.albumId;
-    }
-
-    public final int getUserId() {
-        return this.userId;
-    }
-
     public VKServerUploadInfo(String uploadUrl, int albumId, int userId) {
         this.uploadUrl = uploadUrl;
         this.albumId = albumId;
