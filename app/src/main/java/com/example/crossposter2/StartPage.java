@@ -175,7 +175,7 @@ public class StartPage extends AppCompatActivity {
 
             @Override
             public void onLoginFailed(int i) {
-                System.out.println("fsdfsdfa");
+
             }
         };
         if (data == null || !VK.onActivityResult(requestCode, responseCode, data, callback)) {

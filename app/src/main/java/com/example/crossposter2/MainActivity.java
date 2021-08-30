@@ -17,7 +17,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,11 +24,9 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +38,6 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.example.crossposter2.account.Account;
 import com.example.crossposter2.account.Api;
@@ -76,7 +72,6 @@ import com.vk.api.sdk.auth.VKAccessToken;
 import com.vk.api.sdk.auth.VKAuthCallback;
 import com.vk.api.sdk.auth.VKScope;
 
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,24 +87,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    //test
-    ImageButton btn_camera;
-    ImageButton btn_mic;
-    LinearLayout logToolbarShow, addToolbarShow, postToolbarShow;
-    LinearLayout[] container;
-    RelativeLayout logToolbar, addToolbar, postToolbar;
-    RelativeLayout[] content;
-
-
+    private LinearLayout logToolbarShow, addToolbarShow, postToolbarShow;
+    private LinearLayout[] container;
+    private RelativeLayout logToolbar, addToolbar, postToolbar;
+    private RelativeLayout[] content;
     private final int BOX_WIDTH = 185;
     private final int BOX_HEIGHT = 185;
-    private final int DIALOG_INPUT = 3;
-    private ArrayList<String> imagesEncodedList;
     private ImageView addImageIcon;
-    private final String TAG = "Crossposter";
     private String tgChannelName = "", defChannelName = "";
     private FirebaseAuth mAuth;
     private SharedPreferences token_prf, switch_prf, tgPrf;
+    private static String id;
     private SharedPreferences.Editor editor;
     private String fb_token;
     private long fb_user_id;
@@ -126,14 +114,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton infoButton, reportButton;
     private TextView copyText;
     private FrameLayout performEditText;
-    View.OnClickListener longClickListener;
-    View.OnTouchListener imgListener;
-    VKTokenExpiredHandler tokenHandler = () -> Toast.makeText(MainActivity.this, "Token has been expired.", Toast.LENGTH_SHORT).show();
-    VK vk;
+    private View.OnTouchListener imgListener;
+    private VKTokenExpiredHandler tokenHandler = () -> Toast.makeText(MainActivity.this, "Token has been expired.", Toast.LENGTH_SHORT).show();
     private static ArrayList<String> images = new ArrayList<>();
-    EditText messageEditText;
-    Account fbAccount = new Account();
-    ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
+    private EditText messageEditText;
+    private Account fbAccount = new Account();
+    private ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @SuppressLint("ResourceType")
@@ -149,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
                         ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
                         imgListener = new ClickListeners().getImageListener(imgLayout);
                         try {
-                            imagesEncodedList = new ArrayList<>();
                             assert data != null;
                             if (data.getData() != null) {
                                 Uri mImageUri = data.getData();
@@ -209,11 +194,9 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     } else {
-
                     }
                 }
             });
-
     Api fbApi;
 
     @Override
@@ -237,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
         return uris;
     }
 
-    public int getCameraPhotoOrientation(Context context, Uri imageUri,
+    private int getCameraPhotoOrientation(Context context, Uri imageUri,
                                          String imagePath) {
         int rotate = 0;
         try {
@@ -247,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
             int orientation = exif.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL);
-
             switch (orientation) {
                 case ExifInterface.ORIENTATION_ROTATE_270:
                     rotate = 270;
@@ -259,7 +241,6 @@ public class MainActivity extends AppCompatActivity {
                     rotate = 90;
                     break;
             }
-
             Log.i("RotateImage", "Exif orientation: " + orientation);
             Log.i("RotateImage", "Rotate value: " + rotate);
         } catch (Exception e) {
@@ -280,12 +261,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-
             }
 
             @Override
             public void onError(FacebookException error) {
-
             }
         });
     }
@@ -323,24 +302,17 @@ public class MainActivity extends AppCompatActivity {
         postToolbar = (RelativeLayout) findViewById(R.id.post_toolbar);
         content = new RelativeLayout[]{logToolbar, addToolbar, postToolbar};
         container = new LinearLayout[]{logToolbarShow, addToolbarShow, postToolbarShow};
-
-
         switch_prf = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE);
         facebook_switch_state = switch_prf.getBoolean("facebook_switch_state", false);
         vk_switch_state = switch_prf.getBoolean("vk_switch_state", false);
         telegram_switch_state = switch_prf.getBoolean("telegram_switch_state", false);
-
         fS = (Switch) findViewById(R.id.facebook_switch);
         vS = (Switch) findViewById(R.id.vk_switch);
         tS = (Switch) findViewById(R.id.telegram_switch);
-
         fS.setOnCheckedChangeListener(new ClickListeners().onFacebookSwitchClickListener(MainActivity.this));
-
         logoutVk = (Button) findViewById(R.id.logout_vk);
         logoutTg = (Button) findViewById(R.id.log_out_twitter);
         logoutFb = (Button) findViewById(R.id.log_out_facebook);
-
-
         connectVk = (Button) findViewById(R.id.add_vk);
         connectTg = (Button) findViewById(R.id.add_twitter);
         connectFb = (Button) findViewById(R.id.add_facebook);
@@ -352,31 +324,24 @@ public class MainActivity extends AppCompatActivity {
                 String accessToken = loginResult.getAccessToken()
                         .getToken();
                 Log.i("accessToken", accessToken);
-
                 GraphRequest request = GraphRequest.newMeRequest(
                         loginResult.getAccessToken(),
                         new GraphRequest.GraphJSONObjectCallback() {
                             @Override
                             public void onCompleted(JSONObject object,
                                                     GraphResponse response) {
-
                                 Log.i("LoginActivity",
                                         response.toString());
                                 try {
-                                    info[0] = object.getString("id");
-                                    try {
-                                        URL profile_pic = new URL(
-                                                "http://graph.facebook.com/" + info[0] + "/picture?type=large");
-                                        Log.i("profile_pic",
-                                                profile_pic + "");
-
-                                    } catch (MalformedURLException e) {
-                                        e.printStackTrace();
-                                    }
+                                   id = object.getString("id");
+                                    fbAccount.user_id_fb = Long.parseLong(id);
+                                    fbAccount.access_token_fb = accessToken;
+                                    System.out.println(fbAccount.user_id_fb);
+                                    fbAccount.saveFb(MainActivity.this);
+                                    fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
+                                    Utils.onLogin(MainActivity.this, fS, connectFb, logoutFb);
                                     info[1] = object.getString("name");
                                     info[2] = object.getString("email");
-                                    info[3] = object.getString("gender");
-                                    info[4] = object.getString("birthday");
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -384,26 +349,19 @@ public class MainActivity extends AppCompatActivity {
                         });
                 Bundle parameters = new Bundle();
                 parameters.putString("fields",
-                        "id,name,email,gender, birthday");
+                        "id,name,email");
                 request.setParameters(parameters);
                 request.executeAsync();
-                fbAccount.access_token_fb = accessToken;
-                fbAccount.user_id_fb = Long.parseLong(info[0]);
-                fbAccount.saveFb(MainActivity.this);
-                fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
             }
 
             @Override
             public void onCancel() {
-
             }
 
             @Override
             public void onError(FacebookException error) {
-
             }
         });
-
         if (fbApi == null) {
             Utils.setDisable(MainActivity.this, fS, logoutFb);
         } else {
@@ -421,7 +379,6 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("2");
             Utils.setEnable(MainActivity.this, tS, connectTg, telegram_switch_state);
         }*/
-
         logoutVk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -465,7 +422,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //connectTg.setOnClickListener(new ClickListeners().onTelegramConnectListener(MainActivity.this, connectTg, logoutTg, tS));
-
         post = (Button) findViewById(R.id.btn_post);
         post.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -493,88 +449,90 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
-
         infoButton = (ImageButton) findViewById(R.id.question_button);
         reportButton = (ImageButton) findViewById(R.id.warning_button);
-
         infoButton.setOnClickListener(new ClickListeners().onInfoClickListener(MainActivity.this));
         reportButton.setOnClickListener(new ClickListeners().onReportClickListener(MainActivity.this));
     }
+
     private void checkAuth() {
            /* tgPrf = MainActivity.this.getSharedPreferences("channel", Context.MODE_PRIVATE);
             defChannelName = getResources().getString(R.string.type_here);
             tgChannelName = tgPrf.getString("channel_name", defChannelName);*/
-            if (!VK.isLoggedIn() && fbApi == null /*&& defChannelName.equals(tgChannelName)*/) {
-                Intent intent = new Intent(MainActivity.this, StartPage.class);
-                startActivity(intent);
-                finish();
-            } else {
-                createUI();
-            }
+        if (!VK.isLoggedIn() && fbApi == null /*&& defChannelName.equals(tgChannelName)*/) {
+            Intent intent = new Intent(MainActivity.this, StartPage.class);
+            startActivity(intent);
+            finish();
+        } else {
+            createUI();
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private void createUI() {
-        createToolbarUI();
-        logoutSectionButton = (ImageButton) findViewById(R.id.log_out);
-        connectSectionButton = (ImageButton) findViewById(R.id.add_button);
-        postSectionButton = (ImageButton) findViewById(R.id.send_post);
+            createToolbarUI();
+            logoutSectionButton = (ImageButton) findViewById(R.id.log_out);
+            connectSectionButton = (ImageButton) findViewById(R.id.add_button);
+            postSectionButton = (ImageButton) findViewById(R.id.send_post);
 
-        logoutSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, logToolbarShow, content, logToolbar));
-        connectSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, addToolbarShow, content, addToolbar));
-        postSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, postToolbarShow, content, postToolbar));
+            logoutSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, logToolbarShow, content, logToolbar));
+            connectSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, addToolbarShow, content, addToolbar));
+            postSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, postToolbarShow, content, postToolbar));
+            logoutSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, logToolbarShow, content, logToolbar));
+            connectSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, addToolbarShow, content, addToolbar));
+            postSectionButton.setOnClickListener(new ClickListeners().onBottomLayoutCallListener(container, postToolbarShow, content, postToolbar));
 
-        imgLayout = (LinearLayout) findViewById(R.id.img_layout);
-        addImageIcon = (ImageView) findViewById(R.id.add);
-        addImageIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requestRead();
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                addImageLauncher.launch(intent);
-            }
-        });
+            imgLayout = (LinearLayout) findViewById(R.id.img_layout);
+            addImageIcon = (ImageView) findViewById(R.id.add);
+            addImageIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    requestRead();
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    addImageLauncher.launch(intent);
+                }
+            });
+            messageEditText = (EditText) findViewById(R.id.edit_msg);
+            messageEditText.requestFocus();
+            performEditText = (FrameLayout) findViewById(R.id.perform_edit_text);
+            performEditText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(messageEditText, InputMethodManager.SHOW_IMPLICIT);
+                }
+            });
+            bottomButtonsLayout = (LinearLayout) findViewById(R.id.bottom_buttons_layout);
 
-        messageEditText = (EditText) findViewById(R.id.edit_msg);
-        messageEditText.requestFocus();
-        performEditText = (FrameLayout) findViewById(R.id.perform_edit_text);
-        performEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(messageEditText, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-        bottomButtonsLayout = (LinearLayout) findViewById(R.id.bottom_buttons_layout);
+        }
 
-    }
+        private void onVkClick () {
+            VK.login(this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
+        }
 
-    private void onVkClick() {
-        VK.login(this, Arrays.asList(VKScope.WALL, VKScope.PHOTOS));
-    }
+        private void vkAction () {
 
-    private void vkAction() {
-        Collection<Uri> values = uris.keySet();
-        ArrayList<Uri> uriList = new ArrayList<>(values);
+            Collection<Uri> values = uris.keySet();
+            ArrayList<Uri> uriList = new ArrayList<>(values);
 
-        VK.execute(new VKWallPostCommand(messageEditText.getText().toString(), uriList, VK.getUserId(), false, false), new VKApiCallback<Integer>() {
-            @Override
-            public void success(Integer integer) {
-                runOnUiThread(successRunnable);
-            }
+            VK.execute(new VKWallPostCommand(messageEditText.getText().toString(), uriList, VK.getUserId(), false, false), new VKApiCallback<Integer>() {
+                @Override
+                public void success(Integer integer) {
+                    runOnUiThread(successRunnable);
+                }
 
-            @Override
-            public void fail(@NotNull Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
+                @Override
+                public void fail(@NotNull Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
 
 
-    private void tgAction() {
+        private void tgAction () {
        /* if (!tgChannelName.equals(defChannelName)) {
             try {
                 Collection<Uri> values = uris.keySet();
@@ -590,134 +548,123 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Telegram not Installed", Toast.LENGTH_SHORT).show();
             }
         }*/
-    }
+        }
 
+        private void onFbClick () {
+            connectFbPerformedButton.performClick();
+        }
 
-    private void onFbClick() {
-        connectFbPerformedButton.performClick();
-    }
-
-    private void fbAction() {
-        Collection<Uri> values = uris.keySet();
-        ArrayList<Uri> uriList = new ArrayList<>(values);
-        if (uriList.size() > 6) {
-            Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-            intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
-            intent.setType("image/jpeg");
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
-            startActivity(intent);
-        } else {
-            if (Utils.isAppInstalled(MainActivity.this, "com.facebook.katana")) {
-                if (ShareDialog.canShow(ShareMediaContent.class) | ShareDialog.canShow(ShareContent.class)) {
-                    ShareContent content = setShareContent(uriList);
-                    shareDialog.show(content);
-                    runOnUiThread(clipboardRunnable);
-                }
+        private void fbAction () {
+            Collection<Uri> values = uris.keySet();
+            ArrayList<Uri> uriList = new ArrayList<>(values);
+            if (uriList.size() > 6) {
+                Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
+                intent.setType("image/jpeg");
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
+                startActivity(intent);
             } else {
-
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.facebook.katana")));
-                } catch (android.content.ActivityNotFoundException anfe) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + "com.facebook.katana")));
+                if (Utils.isAppInstalled(MainActivity.this, "com.facebook.katana")) {
+                    if (ShareDialog.canShow(ShareMediaContent.class) | ShareDialog.canShow(ShareContent.class)) {
+                        ShareContent content = setShareContent(uriList);
+                        shareDialog.show(content);
+                        runOnUiThread(clipboardRunnable);
+                    }
+                } else {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.facebook.katana")));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + "com.facebook.katana")));
+                    }
                 }
             }
         }
-    }
-
-    Runnable successRunnable = new Runnable() {
-        @Override
-        public void run() {
-            Toast.makeText(getApplicationContext(), "Запись успешно добавлена", Toast.LENGTH_LONG).show();
-        }
-    };
-    Runnable clipboardRunnable = new Runnable() {
-        @Override
-        public void run() {
-            ClipboardManager clipboard = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("", messageEditText.getText().toString());
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(MainActivity.this, "Some messengers that you have chosen do not support the auto-complete text function, so your text was copied to the clipboard.", Toast.LENGTH_LONG).show();
-        }
-    };
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-        VKAuthCallback callback = new VKAuthCallback() {
+        Runnable successRunnable = new Runnable() {
             @Override
-            public void onLogin(@NotNull VKAccessToken vkAccessToken) {
-                Utils.onLogin(MainActivity.this, vS, connectVk, logoutVk);
-            }
-
-            @Override
-            public void onLoginFailed(int i) {
-
+            public void run() {
+                Toast.makeText(getApplicationContext(), "Post has been created successfully.", Toast.LENGTH_LONG).show();
             }
         };
-        if (data == null || !VK.onActivityResult(requestCode, resultCode, data, callback)) {
-            super.onActivityResult(requestCode, resultCode, data);
+        Runnable clipboardRunnable = new Runnable() {
+            @Override
+            public void run() {
+                ClipboardManager clipboard = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("", messageEditText.getText().toString());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(MainActivity.this, "Some messengers that you have chosen do not support the auto-complete text function, so your text was copied to the clipboard.", Toast.LENGTH_LONG).show();
+            }
+        };
+        @Override
+        protected void onActivityResult ( int requestCode,
+        int resultCode, Intent data){
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+            VKAuthCallback callback = new VKAuthCallback() {
+                @Override
+                public void onLogin(@NotNull VKAccessToken vkAccessToken) {
+                    Utils.onLogin(MainActivity.this, vS, connectVk, logoutVk);
+                    Utils.onLogin(MainActivity.this, vS, connectVk, logoutVk);
+                }
+
+                @Override
+                public void onLoginFailed(int i) {
+                }
+            };
+            if (data == null || !VK.onActivityResult(requestCode, resultCode, data, callback)) {
+                super.onActivityResult(requestCode, resultCode, data);
+            }
         }
-    }
+        private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+        @Override
+        protected void onPause () {
+            super.onPause();
+            editor = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE).edit();
+            editor.putBoolean("facebook_switch_state", fS.isChecked());
+            editor.putBoolean("vk_switch_state", vS.isChecked());
+            editor.putBoolean("telegram_switch_state", tS.isChecked());
+            editor.apply();
+        }
 
-    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        editor = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE).edit();
-        editor.putBoolean("facebook_switch_state", fS.isChecked());
-        editor.putBoolean("vk_switch_state", vS.isChecked());
-        editor.putBoolean("telegram_switch_state", tS.isChecked());
-        editor.apply();
-    }
-
-   private ShareContent setShareContent(ArrayList<Uri> uris) {
-        Log.i("startSettingUris", uris.toString());
-        ArrayList<ShareMedia> photos = new ArrayList<>();
-        ShareContent content;
-        for (int i = 0; i < uris.size(); i++) {
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uris.get(i));
-                SharePhoto photo = new SharePhoto.Builder()
-                        .setBitmap(bitmap)
+        private ShareContent setShareContent (ArrayList < Uri > uris) {
+                Log.i("startSettingUris", uris.toString());
+                ArrayList<ShareMedia> photos = new ArrayList<>();
+                ShareContent content;
+                for (int i = 0; i < uris.size(); i++) {
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uris.get(i));
+                        SharePhoto photo = new SharePhoto.Builder()
+                                .setBitmap(bitmap)
+                                .build();
+                        photos.add(photo);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                content = new ShareMediaContent.Builder()
+                        .addMedia(photos)
                         .build();
-                photos.add(photo);
-            } catch (Exception e) {
-                e.printStackTrace();
+                return content;
+            }
+
+            private void requestRead () {
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                } else {
+                }
+            }
+            @Override
+            public void onRequestPermissionsResult ( int requestCode,
+            @NonNull String[] permissions, @NonNull int[] grantResults){
+                if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    } else {
+                        Toast.makeText(MainActivity.this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             }
         }
-        content = new ShareMediaContent.Builder()
-                .addMedia(photos)
-                .build();
-        return content;
-    }
-
-    private void requestRead() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-        } else {
-        }
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            } else {
-                // Permission Denied
-                Toast.makeText(MainActivity.this, "Permission Denied", Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-}
-
-
