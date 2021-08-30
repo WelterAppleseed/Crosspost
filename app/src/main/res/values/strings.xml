@@ -5,7 +5,8 @@
     <string name="post_bottom_bar_title">POST</string>
     <string name="facebook">Facebook</string>
     <string name="vk">VK</string>
-    <string name="twitter">Twitter</string>
+    <string name="telegram_soon">Telegram (Soon)</string>
+    <string name="telegram">Telegram</string>
     <string name="post">Post</string>
     <string name="oops">O-oops!</string>
     <string name="crosspost">Crosspost</string>
@@ -26,7 +27,8 @@
     <string name="doesnt_allow">Official Facebook methods doesn\'t\ allow to send more than 6 photos at once. If you\'l\l choose more, Crossposter will forced to use</string>
     <string name="another"><u>another method of posting</u></string>
     <string name="stop_show">Don\'t\ show this message again</string>
-
+    <string name="insert_channel">Please enter the ID of the channel to which you want to send the publication.</string>
+    <string name="type_here">Type here…</string>
     <string name="auth_def">Connect with</string>
     <string name="vkontakte">VK</string>
     <string name="vk_app_id">7838662</string>

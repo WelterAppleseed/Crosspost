@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/edit"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -103,6 +102,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone" />
+                <com.facebook.login.widget.LoginButton
+                    android:id="@+id/inst_login_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/fb"
@@ -122,17 +126,17 @@
                 android:layout_height="10dp" />
 
             <com.google.android.material.button.MaterialButton
+                android:clickable="false"
+                android:enabled="false"
                 android:id="@+id/button2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:alpha="0.3"
                 android:backgroundTint="@color/colorWhite"
-                android:text="@string/twitter"
+                android:fontFamily="@font/urbanist_font"
+                android:text="@string/telegram_soon"
                 android:textColor="@color/colorBlack"
                 android:textSize="12sp"
-                android:fontFamily="@font/urbanist_font"
-                android:alpha="0.3"
-                android:clickable="false"
-                android:enabled="false"
                 app:strokeWidth="3dp" />
 
         </LinearLayout>

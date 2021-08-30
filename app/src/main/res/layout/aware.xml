@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="350dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_borders">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="1dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/rep_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="7dp"
+            android:fontFamily="@font/font"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.5"
+            android:text="@string/be_aware"
+            android:textColor="#A11919"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/rep_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:fontFamily="@font/font"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.5"
+            android:text="@string/doesnt_allow"
+            android:textColor="@color/dialogColorText"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/another_method_of_posting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/font"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.5"
+            android:text="@string/another"
+            android:textColor="#2196F3"
+            android:textSize="20sp" />
+
+        <CheckBox
+            android:id="@+id/show_or_not"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="15dp"
+            android:fontFamily="@font/urbanist_font"
+            android:text="@string/stop_show"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/understand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="@color/colorWhite"
+                android:fontFamily="@font/urbanist_font"
+                android:text="@string/understand"
+                android:textColor="@color/colorBlack"
+                android:textSize="12sp"
+                app:strokeWidth="3dp" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

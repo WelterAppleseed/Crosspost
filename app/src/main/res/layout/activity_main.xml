@@ -298,11 +298,14 @@
                         android:layout_weight="1"
                         android:backgroundTint="@color/colorWhite"
                         android:fontFamily="@font/urbanist_font"
-                        android:text="@string/twitter"
+                        android:text="@string/telegram"
                         android:textColor="@color/colorBlack"
                         android:textSize="12sp"
                         app:strokeColor="@color/colorBlack"
-                        app:strokeWidth="3dp" />
+                        app:strokeWidth="3dp"
+                        android:clickable="false"
+                        android:enabled="false"
+                        android:alpha="0.3"/>
 
                     <Space
                         android:layout_width="wrap_content"
@@ -398,11 +401,14 @@
                         android:layout_weight="1"
                         android:backgroundTint="@color/colorWhite"
                         android:fontFamily="@font/urbanist_font"
-                        android:text="@string/twitter"
+                        android:text="@string/telegram"
                         android:textColor="@color/colorBlack"
                         android:textSize="12sp"
                         app:strokeColor="@color/colorBlack"
-                        app:strokeWidth="3dp" />
+                        app:strokeWidth="3dp"
+                        android:enabled="false"
+                        android:clickable="false"
+                        android:alpha="0.3"/>
 
                     <Space
                         android:layout_width="wrap_content"
@@ -446,7 +452,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/bottom_layout_border"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -506,20 +512,23 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/twitter_switch_title"
+                            android:id="@+id/telegram_switch_title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/urbanist_font"
                             android:gravity="center"
-                            android:text="@string/twitter" />
+                            android:text="@string/telegram" />
 
                         <Space
                             android:layout_width="match_parent"
                             android:layout_height="2dp" />
 
                         <Switch
-                            android:id="@+id/twitter_switch"
+                            android:id="@+id/telegram_switch"
                             style="@style/Widget.Crossposter.Switch"
+                            android:alpha="0.3"
+                            android:enabled="false"
+                            android:clickable="false"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center" />

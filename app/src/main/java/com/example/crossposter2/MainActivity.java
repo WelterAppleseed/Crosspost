@@ -45,9 +45,7 @@ import android.widget.Toast;
 
 import com.example.crossposter2.account.Account;
 import com.example.crossposter2.account.Api;
-import com.example.crossposter2.fb.FacebookActivity;
 import com.example.crossposter2.fb.FbConstant;
-import com.example.crossposter2.tg.IsAppAvailable;
 import com.example.crossposter2.utils.ClickListeners;
 import com.example.crossposter2.utils.ImageManager;
 import com.example.crossposter2.utils.ImageUI;
@@ -66,7 +64,6 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareContent;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareMedia;
 import com.facebook.share.model.ShareMediaContent;
 import com.facebook.share.model.SharePhoto;
@@ -110,13 +107,13 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> imagesEncodedList;
     private ImageView addImageIcon;
     private final String TAG = "Crossposter";
-    final String SAVED_TG_CHANNEL = "saved_tg_channel";
+    private String tgChannelName = "", defChannelName = "";
     private FirebaseAuth mAuth;
-    private SharedPreferences token_prf, switch_prf;
+    private SharedPreferences token_prf, switch_prf, tgPrf;
     private SharedPreferences.Editor editor;
     private String fb_token;
     private long fb_user_id;
-    boolean facebook_switch_state, vk_switch_state, twitter_switch_state;
+    boolean facebook_switch_state, vk_switch_state, telegram_switch_state;
     private CallbackManager callbackManager;
     private LoginButton connectFbPerformedButton;
     private ImageButton logoutSectionButton, connectSectionButton, postSectionButton;
@@ -125,20 +122,15 @@ public class MainActivity extends AppCompatActivity {
     private ShareDialog shareDialog;
     private Switch fS, tS, vS, oS;
     private FragmentManager manager;
-    private Button connectVk, connectTw, connectFb, logoutVk, logoutTw, logoutFb, post;
+    private Button connectVk, connectTg, connectFb, logoutVk, logoutTg, logoutFb, post;
     private ImageButton infoButton, reportButton;
     private TextView copyText;
     private FrameLayout performEditText;
     View.OnClickListener longClickListener;
     View.OnTouchListener imgListener;
-    VKTokenExpiredHandler tokenHandler = new VKTokenExpiredHandler() {
-        @Override
-        public void onTokenExpired() {
-            Toast.makeText(MainActivity.this, "Token has been expired.", Toast.LENGTH_SHORT).show();
-        }
-    };
+    VKTokenExpiredHandler tokenHandler = () -> Toast.makeText(MainActivity.this, "Token has been expired.", Toast.LENGTH_SHORT).show();
     VK vk;
-    private static ArrayList<String> images = new ArrayList<String>();
+    private static ArrayList<String> images = new ArrayList<>();
     EditText messageEditText;
     Account fbAccount = new Account();
     ActivityResultLauncher<Intent> addImageLauncher = registerForActivityResult(
@@ -157,7 +149,8 @@ public class MainActivity extends AppCompatActivity {
                         ImageManager imageManager = new ImageManager(getApplication(), BOX_WIDTH, BOX_HEIGHT);
                         imgListener = new ClickListeners().getImageListener(imgLayout);
                         try {
-                            imagesEncodedList = new ArrayList<String>();
+                            imagesEncodedList = new ArrayList<>();
+                            assert data != null;
                             if (data.getData() != null) {
                                 Uri mImageUri = data.getData();
                                 String path = RealPathUtil.getRealPathFromURI_API19(getApplicationContext(), mImageUri);
@@ -275,15 +268,7 @@ public class MainActivity extends AppCompatActivity {
         return rotate;
     }
 
-    private void checkAuth() {
-        if (!VK.isLoggedIn() && fbApi == null) {
-            Intent intent = new Intent(MainActivity.this, StartPage.class);
-            startActivity(intent);
-            finish();
-        } else {
-            createUI();
-        }
-    }
+
     public void facebookShowDialogInit() {
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
@@ -339,27 +324,25 @@ public class MainActivity extends AppCompatActivity {
         content = new RelativeLayout[]{logToolbar, addToolbar, postToolbar};
         container = new LinearLayout[]{logToolbarShow, addToolbarShow, postToolbarShow};
 
-        //Getting are they checked
 
         switch_prf = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE);
         facebook_switch_state = switch_prf.getBoolean("facebook_switch_state", false);
         vk_switch_state = switch_prf.getBoolean("vk_switch_state", false);
-        twitter_switch_state = switch_prf.getBoolean("twitter_switch_state", false);
-        //Setting result
+        telegram_switch_state = switch_prf.getBoolean("telegram_switch_state", false);
 
         fS = (Switch) findViewById(R.id.facebook_switch);
         vS = (Switch) findViewById(R.id.vk_switch);
-        tS = (Switch) findViewById(R.id.twitter_switch);
+        tS = (Switch) findViewById(R.id.telegram_switch);
 
         fS.setOnCheckedChangeListener(new ClickListeners().onFacebookSwitchClickListener(MainActivity.this));
 
         logoutVk = (Button) findViewById(R.id.logout_vk);
-        logoutTw = (Button) findViewById(R.id.log_out_twitter);
+        logoutTg = (Button) findViewById(R.id.log_out_twitter);
         logoutFb = (Button) findViewById(R.id.log_out_facebook);
 
 
         connectVk = (Button) findViewById(R.id.add_vk);
-        connectTw = (Button) findViewById(R.id.add_twitter);
+        connectTg = (Button) findViewById(R.id.add_twitter);
         connectFb = (Button) findViewById(R.id.add_facebook);
         connectFbPerformedButton = (LoginButton) findViewById(R.id.perform_login_button);
         connectFbPerformedButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -408,8 +391,6 @@ public class MainActivity extends AppCompatActivity {
                 fbAccount.user_id_fb = Long.parseLong(info[0]);
                 fbAccount.saveFb(MainActivity.this);
                 fbApi = new Api(fbAccount.access_token_fb, FbConstant.appId);
-
-                ClickListeners.onLogin(MainActivity.this, fS, connectFb, logoutFb);
             }
 
             @Override
@@ -433,9 +414,13 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Utils.setEnable(MainActivity.this, vS, connectVk, vk_switch_state);
         }
-        Utils.setDisable(MainActivity.this, tS, logoutTw);
-        connectTw.setEnabled(false);
-        connectTw.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+        /*if (tgChannelName.equals(defChannelName)) {
+            System.out.println("1");
+            Utils.setDisable(MainActivity.this, tS, logoutTg);
+        } else {
+            System.out.println("2");
+            Utils.setEnable(MainActivity.this, tS, connectTg, telegram_switch_state);
+        }*/
 
         logoutVk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -457,6 +442,16 @@ public class MainActivity extends AppCompatActivity {
                 checkAuth();
             }
         });
+       /* logoutTg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor = getSharedPreferences("channel", Context.MODE_PRIVATE).edit();
+                editor.putString("channel_name", getResources().getString(R.string.type_here));
+                editor.apply();
+                ClickListeners.onLogout(MainActivity.this, tS, logoutTg, connectTg);
+                checkAuth();
+            }
+        });*/
         connectVk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -469,6 +464,8 @@ public class MainActivity extends AppCompatActivity {
                 onFbClick();
             }
         });
+        //connectTg.setOnClickListener(new ClickListeners().onTelegramConnectListener(MainActivity.this, connectTg, logoutTg, tS));
+
         post = (Button) findViewById(R.id.btn_post);
         post.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -479,11 +476,11 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             if (vS.isChecked()) {
                                 System.out.println("VS");
-                                //vkAction();
+                                vkAction();
                             }
                             if (tS.isChecked()) {
                                 System.out.println("TS");
-                                //tgAction();
+                                tgAction();
                             }
                             if (fS.isChecked()) {
                                 System.out.println("FS");
@@ -502,6 +499,18 @@ public class MainActivity extends AppCompatActivity {
 
         infoButton.setOnClickListener(new ClickListeners().onInfoClickListener(MainActivity.this));
         reportButton.setOnClickListener(new ClickListeners().onReportClickListener(MainActivity.this));
+    }
+    private void checkAuth() {
+           /* tgPrf = MainActivity.this.getSharedPreferences("channel", Context.MODE_PRIVATE);
+            defChannelName = getResources().getString(R.string.type_here);
+            tgChannelName = tgPrf.getString("channel_name", defChannelName);*/
+            if (!VK.isLoggedIn() && fbApi == null /*&& defChannelName.equals(tgChannelName)*/) {
+                Intent intent = new Intent(MainActivity.this, StartPage.class);
+                startActivity(intent);
+                finish();
+            } else {
+                createUI();
+            }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -566,50 +575,26 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void tgAction() {
-        final String appName = "org.telegram.messenger";
-        final boolean isAppInstalled = IsAppAvailable.isAppAvailable(this.getApplicationContext(), appName);
-        if (isAppInstalled) {
-            token_prf = getPreferences(MODE_PRIVATE);
-            String savedText = token_prf.getString(SAVED_TG_CHANNEL, "");
-            if (!savedText.equals("saved_tg_channel")) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_TEXT, messageEditText.getText().toString());
-                intent.setType("text/plain");
-                intent.setPackage(appName);
+       /* if (!tgChannelName.equals(defChannelName)) {
+            try {
+                Collection<Uri> values = uris.keySet();
+                ArrayList<Uri> uriList = new ArrayList<>(values);
+                Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_SUBJECT, messageEditText.getText().toString());
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
                 startActivity(intent);
-            } else {
-                Toast.makeText(this, "Channel name is not provided", Toast.LENGTH_SHORT).show();
+                System.out.println("321");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Telegram not Installed", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            Toast.makeText(this, "Telegram not Installed", Toast.LENGTH_SHORT).show();
-        }
+        }*/
     }
 
 
     public void onFbClick() {
         connectFbPerformedButton.performClick();
-        connectFbPerformedButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                fS.setEnabled(true);
-                fS.setClickable(true);
-                connectFb.setClickable(false);
-                connectFb.setEnabled(false);
-                logoutFb.setClickable(true);
-                logoutFb.setEnabled(true);
-                connectFb.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-
-            }
-        });
     }
 
     public void fbAction() {
@@ -661,13 +646,7 @@ public class MainActivity extends AppCompatActivity {
         VKAuthCallback callback = new VKAuthCallback() {
             @Override
             public void onLogin(@NotNull VKAccessToken vkAccessToken) {
-                vS.setEnabled(true);
-                vS.setClickable(true);
-                connectVk.setClickable(false);
-                connectVk.setEnabled(false);
-                logoutVk.setClickable(true);
-                logoutVk.setEnabled(true);
-                connectVk.setBackgroundColor(getResources().getColor(R.color.disabledColorBack));
+                ClickListeners.onLogin(MainActivity.this, vS, connectVk, logoutVk);
             }
 
             @Override
@@ -688,7 +667,7 @@ public class MainActivity extends AppCompatActivity {
         editor = MainActivity.this.getSharedPreferences("state", Context.MODE_PRIVATE).edit();
         editor.putBoolean("facebook_switch_state", fS.isChecked());
         editor.putBoolean("vk_switch_state", vS.isChecked());
-        editor.putBoolean("twitter_switch_state", tS.isChecked());
+        editor.putBoolean("telegram_switch_state", tS.isChecked());
         editor.apply();
     }
 

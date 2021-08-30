@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.net.Uri;
+import android.preference.SwitchPreference;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -19,6 +20,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,7 +42,7 @@ public class ClickListeners {
     Switch fS, tS, vS, oS;
     public static final int y = Utils.dpToPx(6);
     private static boolean dontShow;
-    private SharedPreferences switchPrf;
+    private SharedPreferences switchPrf, tgPrf;
     private final double dif_const = 0.00588235294;
     private float yCoOrdinate;
     private SharedPreferences.Editor editor;
@@ -206,6 +208,45 @@ public class ClickListeners {
         };
     }
 
+    public View.OnClickListener onTelegramConnectListener(Context context, Button logoutBt, Button connectBt, Switch swtch) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog dialog = new Dialog(context);
+                dialog.setContentView(R.layout.insert_telegram);
+                EditText channelNameInsert = (EditText) dialog.findViewById(R.id.type_here);
+                tgPrf = context.getSharedPreferences("channel", Context.MODE_PRIVATE);
+                channelNameInsert.setPaintFlags(channelNameInsert.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                String defValue = context.getResources().getString(R.string.type_here);
+                channelNameInsert.setText(tgPrf.getString("channel_name", defValue));
+                Button save = (Button) dialog.findViewById(R.id.save_channel);
+                save.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (channelNameInsert.getText().toString().equals("") || channelNameInsert.getText().toString().equals(defValue)) {
+                            Toast.makeText(context, "Channel name is not provided", Toast.LENGTH_SHORT);
+                        } else {
+                            editor = context.getSharedPreferences("channel", Context.MODE_PRIVATE).edit();
+                            editor.putString("channel_name", channelNameInsert.getText().toString());
+                            editor.apply();
+                            onLogin(context, swtch, logoutBt, connectBt);
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                Button cancel = (Button) dialog.findViewById(R.id.back);
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+            }
+        };
+    }
+
+
     public CompoundButton.OnCheckedChangeListener onFacebookSwitchClickListener(Context context) {
         return new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -255,24 +296,32 @@ public class ClickListeners {
         };
     }
 
-    public static void onLogout(Context context, Switch swtch, Button logoutButton, Button connectButton) {
+    public static void onLogout(Context context, Switch swtch, Button logoutButton, Button
+            connectButton) {
         swtch.setClickable(false);
         swtch.setFocusable(false);
         swtch.setEnabled(false);
+        swtch.setAlpha((float) 0.3);
         logoutButton.setEnabled(false);
         logoutButton.setClickable(false);
         logoutButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
         connectButton.setEnabled(true);
         connectButton.setClickable(true);
+        connectButton.setBackgroundColor(context.getResources().getColor(R.color.colorInvisible));
     }
 
-    public static void onLogin(Context context, Switch swtch, Button connectButton, Button logoutButton) {
+    public static void onLogin(Context context, Switch swtch, Button connectButton, Button
+            logoutButton) {
         swtch.setEnabled(true);
+        swtch.setClickable(true);
+        swtch.setFocusable(true);
+        swtch.setAlpha(1);
         connectButton.setEnabled(false);
         connectButton.setClickable(false);
+        connectButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
         logoutButton.setEnabled(true);
         logoutButton.setClickable(true);
-        connectButton.setBackgroundColor(context.getResources().getColor(R.color.disabledColorBack));
+        logoutButton.setBackgroundColor(context.getResources().getColor(R.color.colorInvisible));
     }
 }
 

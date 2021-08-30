@@ -1,18 +1,12 @@
 package com.example.crossposter2;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.media.FaceDetector;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.crossposter2.utils.ClickListeners;
@@ -41,14 +35,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StartPage extends AppCompatActivity {
-    private Button fb_button, vk_button;
+    private Button fb_button, vk_button, inst_button;
     private static String id, name, email, gender, birthday, page_access_token, page_id;
     private ImageButton reportButton;
     private CallbackManager callbackManager;
-    private static  AccessToken access;
-    private LoginButton fb_hidden_button;
-    public static String redirect_url="https://oauth.vk.com/blank.html";
-    private static String API_VERSION="5.5";
+    private static AccessToken access;
+    private LoginButton hidden_button, hidden_button_inst;
+    public static String redirect_url = "https://oauth.vk.com/blank.html";
+    private static String API_VERSION = "5.5";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,34 +61,35 @@ public class StartPage extends AppCompatActivity {
         fb_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fb_hidden_button.performClick();
+                hidden_button.performClick();
             }
         });
-        fb_hidden_button = (LoginButton) findViewById(R.id.fb_login_button);
-        List< String > permissionNeeds = Arrays.asList("email", "pages_show_list", "pages_manage_posts", "pages_read_engagement", "manage_pages");
+        hidden_button = (LoginButton) findViewById(R.id.fb_login_button);
+        List<String> permissionNeeds = Arrays.asList("email", "pages_show_list");
         //fb_hidden_button.setPermissions(permissionNeeds);
-        fb_hidden_button.registerCallback(callbackManager,
-                new FacebookCallback<LoginResult>() {@Override
-                public void onSuccess(LoginResult loginResult) {
+        hidden_button.registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
 
-                    System.out.println("onSuccess");
+                        System.out.println("onSuccess");
 
-                    String accessToken = loginResult.getAccessToken()
-                            .getToken();
-                    Log.i("accessToken", accessToken);
-                    access = loginResult.getAccessToken();
+                        String accessToken = loginResult.getAccessToken()
+                                .getToken();
+                        Log.i("accessToken", accessToken);
+                        access = loginResult.getAccessToken();
 
-                    GraphRequest request = GraphRequest.newMeRequest(
-                            loginResult.getAccessToken(),
-                            new GraphRequest.GraphJSONObjectCallback() {
-                                @Override
-                                public void onCompleted(JSONObject object,
-                                                        GraphResponse response) {
+                        GraphRequest request = GraphRequest.newMeRequest(
+                                loginResult.getAccessToken(),
+                                new GraphRequest.GraphJSONObjectCallback() {
+                                    @Override
+                                    public void onCompleted(JSONObject object,
+                                                            GraphResponse response) {
 
-                                    Log.i("LoginActivity",
-                                            response.toString());
-                                    try {
-                                        id = object.getString("id");
+                                        Log.i("LoginActivity",
+                                                response.toString());
+                                        try {
+                                            id = object.getString("id");
                                     /*final String client_id = getResources().getString(R.string.APP_ID);
                                     final String secret = getResources().getString(R.string.SECRET_ID);
                                     new GraphRequest(
@@ -122,37 +118,38 @@ public class StartPage extends AppCompatActivity {
                                                 }
                                             }
                                     ).executeAsync();*/
-                                        try {
-                                            URL profile_pic = new URL(
-                                                    "http://graph.facebook.com/" + id + "/picture?type=large");
-                                            Log.i("profile_pic",
-                                                    profile_pic + "");
+                                            try {
+                                                URL profile_pic = new URL(
+                                                        "http://graph.facebook.com/" + id + "/picture?type=large");
+                                                Log.i("profile_pic",
+                                                        profile_pic + "");
 
-                                        } catch (MalformedURLException e) {
+                                            } catch (MalformedURLException e) {
+                                                e.printStackTrace();
+                                            }
+                                            name = object.getString("name");
+                                            email = object.getString("email");
+                                            gender = object.getString("gender");
+                                            birthday = object.getString("birthday");
+                                        } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
-                                        name = object.getString("name");
-                                        email = object.getString("email");
-                                        gender = object.getString("gender");
-                                        birthday = object.getString("birthday");
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
                                     }
-                                }
-                            });
-                    Bundle parameters = new Bundle();
-                    parameters.putString("fields",
-                            "id,name,email");
-                    request.setParameters(parameters);
-                    request.executeAsync();
+                                });
+                        Bundle parameters = new Bundle();
+                        parameters.putString("fields",
+                                "id,name,email");
+                        request.setParameters(parameters);
+                        request.executeAsync();
 
-                    Intent intent = new Intent(StartPage.this, MainActivity.class);
-                    String token = loginResult.getAccessToken().getToken();
-                    intent.putExtra("access_token_fb", token);
-                    intent.putExtra("user_id_fb", id);
-                    startActivity(intent);
-                    finish();
-                }
+                        Intent intent = new Intent(StartPage.this, MainActivity.class);
+                        String token = loginResult.getAccessToken().getToken();
+                        intent.putExtra("access_token_fb", token);
+                        intent.putExtra("user_id_fb", id);
+                        startActivity(intent);
+                        finish();
+                    }
+
                     @Override
                     public void onCancel() {
                         System.out.println("onCancel");
@@ -160,15 +157,13 @@ public class StartPage extends AppCompatActivity {
 
                     @Override
                     public void onError(FacebookException exception) {
-                    exception.printStackTrace();
+                        exception.printStackTrace();
                         System.out.println("onError");
                         Log.v("StartPage", exception.getCause().toString());
                     }
                 });
     }
-    public void facebookPageRequest() {
 
-    }
     private void vkContentCreate() {
         vk_button = (Button) findViewById(R.id.startPageVkButton);
         vk_button.setOnClickListener(new View.OnClickListener() {
@@ -178,6 +173,7 @@ public class StartPage extends AppCompatActivity {
             }
         });
     }
+
     @Override
     protected void onActivityResult(int requestCode, int responseCode,
                                     Intent data) {

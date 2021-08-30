@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.crossposter2"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -74,6 +74,7 @@ dependencies {
 
     // Facebook Android SDK (everything)
     implementation 'com.facebook.android:facebook-android-sdk:11.1.0'
+    implementation 'com.github.pengrad:java-telegram-bot-api:5.2.0'
 
 
 }
